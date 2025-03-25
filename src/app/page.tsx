@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[16px] row-start-2 items-center sm:items-start">
-        <div className="flex justify-center items-center text-center w-full">
+        <div className="flex items-center w-full">
           <Image
             className="dark:hidden"
             src="/opencollective-logo.svg"
@@ -22,13 +22,13 @@ export default function Home() {
             priority
           />
         </div>
-        <div className="text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+        <div className="text-sm/6 sm:text-left font-[family-name:var(--font-geist-mono)]">
           <strong>Open Collective</strong> | ˈōpən kəˈlektiv |
           <ul className="list-disc pl-4 max-w-[440px]">
             <li>a collective of people that operates in the open</li>
           </ul>
         </div>
-        <div className="text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+        <div className="text-sm/6 sm:text-left font-[family-name:var(--font-geist-mono)]">
           <strong>opencollective.xyz</strong> | since 2025
           <ul className="list-disc pl-4 max-w-[440px]">
             <li className="">
@@ -38,7 +38,7 @@ export default function Home() {
             <li>using stable coins (USDC, EURe, DAI, etc.) and other tokens</li>
           </ul>
         </div>
-        <div className="text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+        <div className="text-sm/6 sm:text-left font-[family-name:var(--font-geist-mono)]">
           <strong>
             <a
               href="https://opencollective.com"
@@ -70,13 +70,13 @@ export default function Home() {
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
-          className=" flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://t.me/opencollective"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
-            className="dark:invert "
+            className="dark:invert"
             aria-hidden
             src="/telegram.svg"
             alt="telegram icon"
@@ -86,14 +86,14 @@ export default function Home() {
           Telegram
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="nostr:npub1hsr6x2zhw3y6zzndcfel0xwcckkhf05w2ghnulelsppcruq4c3qqzv5whg"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             aria-hidden
-            className="dark:invert "
+            className="dark:invert"
             src="/nostr.svg"
             alt="Nostr icon"
             width={16}
@@ -102,13 +102,13 @@ export default function Home() {
           Nostr
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://github.com/opencollective/opencollective.xyz"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
-            className="dark:invert "
+            className="dark:invert"
             aria-hidden
             src="/github.svg"
             alt="github icon"
