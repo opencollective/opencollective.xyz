@@ -20,8 +20,10 @@ export type URI =
 export type Token = {
   name?: string;
   symbol?: string;
+  chain: string;
   address: Address;
   decimals?: number;
+  imageUrl?: string;
 };
 
 export type TokenStats = {
@@ -40,6 +42,7 @@ export type TokenStats = {
 };
 export interface Transaction {
   blockNumber: number;
+  chainId: number;
   txHash: TxHash;
   txIndex?: number;
   logIndex?: number;
@@ -88,4 +91,13 @@ export type ChainConfig = {
   explorer_name: string;
   rpc: string | string[];
   ws?: string | string[];
+};
+
+export type WalletConfig = {
+  type: "blockchain" | "opencollective";
+  address: string;
+  tokens?: Token[];
+  hostSlug?: string;
+  collectiveSlug?: string;
+  currency?: string;
 };

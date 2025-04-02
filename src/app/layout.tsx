@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,23 +14,58 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const title = "Open Collective - Open source your organization";
+const description = "Open Source Organization";
+
 export const metadata: Metadata = {
-  title: "Open Collective",
-  description:
-    "Manage financial and non-financial contributions for your community project",
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    url: "https://opencollective.xyz",
+    siteName: "opencollective.xyz",
+    images: [
+      {
+        url: "https://opencollective.xyz/opencollective-ogimage.png", // 1200x630px recommended
+        width: 1200,
+        height: 630,
+        alt: title,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    creator: "@opencollect",
+    images: ["https://opencollective.xyz/opencollective-light.png"],
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className="[@media(prefers-color-scheme:dark)]:dark">
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
+        <main className="flex flex-col gap-4 max-w-screen-lg mx-auto p-4 md:p-16">
+          {children}
+          <Toaster />
+        </main>
+        <Footer />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@
       "name": "Citizen Spring",
       "wallets": [
         {
+          "type": "blockchain",
           "chain": "gnosis",
           "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf",
           "type": "multisig",
@@ -23,11 +24,20 @@
     {
       "slug": "commonshub-brussels",
       "name": "Commons Hub Brussels",
+      "tokens": [
+        {
+          "symbol": "CHT",
+          "chain": "celo",
+          "address": "0x65dd32834927de9e57e72a3e2130a19f81c6371d",
+          "decimals": 6,
+          "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
+        }
+      ],
       "wallets": [
         {
+          "type": "blockchain",
           "chain": "gnosis",
           "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf/commonshub",
-          "type": "multisig",
           "label": "citizenspring-monerium",
           "tokens": [
             {
@@ -40,9 +50,9 @@
           ]
         },
         {
+          "type": "blockchain",
           "chain": "gnosis",
-          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf/commonshub",
-          "type": "citizenwallet",
+          "address": "0x8b120C5756b86dE2cdeBf53C08D8bDD36f897c03",
           "label": "fridge",
           "tokens": [
             {
@@ -55,6 +65,7 @@
           ]
         },
         {
+          "type": "blockchain",
           "chain": "celo",
           "address": "0x0000000000000000000000000000000000000000",
           "token": [
@@ -66,139 +77,14 @@
               "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
             }
           ]
+        },
+        {
+          "type": "opencollective",
+          "hostSlug": "citizenspring-asbl",
+          "collectiveSlug": "commonshub-brussels",
+          "currency": "EUR"
         }
       ]
     }
-  ],
-  "chains": {
-    "ethereum": {
-      "id": 1,
-      "explorer_url": "https://etherscan.io",
-      "explorer_name": "Etherscan",
-      "explorer_api": "https://api.etherscan.io",
-      "rpc": [
-        "https://eth.llamarpc.com",
-        "https://eth.drpc.org",
-        "https://rpc.ankr.com/eth",
-        "https://rpc.eth.gateway.fm",
-        "https://eth.meowrpc.com"
-      ]
-    },
-    "polygon": {
-      "id": 137,
-      "explorer_url": "https://polygonscan.com",
-      "explorer_api": "https://api.polygonscan.com",
-      "explorer_name": "Polygonscan",
-      "rpc": [
-        "https://polygon.drpc.org",
-        "https://polygon.llamarpc.com",
-        "https://polygon-rpc.com",
-        "https://polygon-bor-rpc.publicnode.com"
-      ],
-      "ws": [
-        "wss://polygon.drpc.org",
-        "wss://polygon-bor-rpc.publicnode.com",
-        "wss://polygon.llamarpc.com"
-      ]
-    },
-    "celo": {
-      "id": 42220,
-      "explorer_url": "https://celoscan.io",
-      "explorer_api": "https://api.celoscan.io",
-      "explorer_name": "CeloScan",
-      "rpc": [
-        "https://rpc.ankr.com/celo",
-        "https://1rpc.io/celo",
-        "https://forno.celo.org",
-        "https://celo.drpc.org"
-      ],
-      "ws": [
-        "wss://forno.celo.org/ws",
-        "wss://celo.drpc.org",
-        "wss://celo-bor-rpc.publicnode.com"
-      ]
-    },
-    "avalanche": {
-      "id": 43114,
-      "explorer_url": "https://cchain.explorer.avax.network",
-      "explorer_name": "Avalanche Explorer",
-      "rpc": [
-        "https://avalanche.drpc.org",
-        "https://avax.meowrpc.com",
-        "https://1rpc.io/avax/c",
-        "https://avalanche.public-rpc.com"
-      ]
-    },
-    "optimism": {
-      "id": 10,
-      "explorer_url": "https://optimistic.etherscan.io",
-      "explorer_name": "Optimistic Explorer",
-      "rpc": [
-        "https://optimism.drpc.org",
-        "https://optimism.llamarpc.com",
-        "https://0xrpc.io/op",
-        "https://mainnet.optimism.io",
-        "https://gateway.tenderly.co/public/optimism"
-      ]
-    },
-    "arbitrum": {
-      "id": 42161,
-      "explorer_url": "https://arbiscan.io",
-      "explorer_api": "https://api.arbiscan.io",
-      "explorer_name": "Arbiscan",
-      "rpc": [
-        "https://arbitrum.drpc.org",
-        "https://arbitrum.llamarpc.com",
-        "https://arb1.lava.build",
-        "https://arb-pokt.nodies.app",
-        "https://rpc.ankr.com/arbitrum"
-      ]
-    },
-    "base": {
-      "id": 8453,
-      "explorer_url": "https://basescan.org",
-      "explorer_name": "BaseScan",
-      "explorer_api": "https://api.basescan.org",
-      "rpc": [
-        "https://base.drpc.org",
-        "https://base.llamarpc.com",
-        "https://base-pokt.nodies.app",
-        "https://base.rpc.subquery.network/public",
-        "https://base.meowrpc.com"
-      ],
-      "ws": [
-        "wss://0xrpc.io/base",
-        "wss://base-rpc.publicnode.com",
-        "wss://base.gateway.tenderly.co",
-        "wss://base.drpc.org",
-        "wss://base.llamarpc.com",
-        "wss://base.meowrpc.com/ws"
-      ]
-    },
-    "ethereum_sepolia": {
-      "id": 11155111,
-      "explorer_url": "https://sepolia.etherscan.io",
-      "explorer_name": "Etherscan Sepolia",
-      "rpc": "https://sepolia.drpc.org"
-    },
-    "gnosis": {
-      "id": 100,
-      "explorer_url": "https://gnosisscan.io",
-      "explorer_name": "GnosisScan",
-      "explorer_api": "https://api.gnosisscan.io",
-      "rpc": [
-        "https://rpc.gnosischain.com",
-        "https://1rpc.io/gnosis",
-        "https://rpc.gnosis.gateway.fm",
-        "https://gnosis.oat.farm",
-        "https://gnosis-pokt.nodies.app"
-      ],
-      "ws": [
-        "wss://rpc.gnosischain.com/wss",
-        "wss://0xrpc.io/gno",
-        "wss://gnosis-rpc.publicnode.com",
-        "wss://gnosis-pokt.nodies.app/ws"
-      ]
-    }
-  }
+  ]
 }

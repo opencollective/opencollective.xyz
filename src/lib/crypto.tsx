@@ -1,6 +1,5 @@
-import config from "@/config";
 import { ChainConfig, EtherscanTransfer } from "@/types";
-
+import chains from "@/chains.json";
 let cache: Record<string, EtherscanTransfer[]> = {};
 
 setInterval(() => {
@@ -10,10 +9,9 @@ setInterval(() => {
 export async function getTransactions(
   chain: string,
   contractaddress: string | null,
-  address: string | null
+  address?: string | null
 ): Promise<EtherscanTransfer[]> {
-  const chainConfig: ChainConfig =
-    config.chains[chain as keyof typeof config.chains];
+  const chainConfig: ChainConfig = chains[chain as keyof typeof chains];
   const apikey = process.env[`${chain?.toUpperCase()}_ETHERSCAN_API_KEY`];
 
   if (!apikey) {
@@ -34,6 +32,7 @@ export async function getTransactions(
     console.log(">>> cache hit", cacheKey);
     return cache[cacheKey];
   }
+  console.log(">>> getTransactions", chain, contractaddress, address);
 
   const params = new URLSearchParams({
     module: "account",
@@ -53,12 +52,18 @@ export async function getTransactions(
   }
 
   const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
+  console.log(">>> apicall", apicall);
   const response = await fetch(apicall);
   const data = await response.json();
   if (data.status === "1") {
     cache[cacheKey] = data.result;
     return data.result;
   }
+  if (data.status === "0") {
+    console.error(">>> error fetching transactions", data.message);
+    return data.result;
+  }
+  console.error(">>> error fetching transactions", data);
   throw new Error(
     `Failed to fetch transactions for ${chain}:${contractaddress}:${address}`
   );

@@ -23,9 +23,13 @@ export default function Home() {
           />
         </div>
         <div className="text-sm/6 sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <strong>Open Collective</strong> | ˈōpən kəˈlektiv |
+          <strong>Open Collective</strong> | ˈōpən kəˈlektiv
           <ul className="list-disc pl-4 max-w-[440px]">
-            <li>a collective of people that operates in the open</li>
+            <li>
+              a collective of people working for the community in a transparent
+              way
+            </li>
+            <li>an open source form of organization</li>
           </ul>
         </div>
         <div className="text-sm/6 sm:text-left font-[family-name:var(--font-geist-mono)]">
@@ -33,7 +37,7 @@ export default function Home() {
           <ul className="list-disc pl-4 max-w-[440px]">
             <li className="">
               web3 platform to manage financial and non-financial contributions
-              for your collective
+              for your collective in a transparent way
             </li>
             <li>using stable coins (USDC, EURe, DAI, etc.) and other tokens</li>
           </ul>
@@ -50,10 +54,10 @@ export default function Home() {
           | since 2015
           <ul className="list-disc pl-4 max-w-[440px]">
             <li className="">
-              web2 platform to receive donations and manage your expenses in the
-              open
+              web2 platform to receive donations and manage the expenses of your
+              collective in a transparent way
             </li>
-            <li>using fiat currencies (USD, EUR, GBP, etc.)</li>
+            <li>using fiat currencies ($, €, £, etc.)</li>
           </ul>
         </div>
 
@@ -71,19 +75,19 @@ export default function Home() {
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://t.me/opencollective"
+          href="https://discord.gg/Fepd7VSe9D"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Image
             className="dark:invert"
             aria-hidden
-            src="/telegram.svg"
-            alt="telegram icon"
+            src="/discord.svg"
+            alt="discord icon"
             width={16}
             height={16}
           />
-          Telegram
+          Discord
         </a>
         <a
           className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
