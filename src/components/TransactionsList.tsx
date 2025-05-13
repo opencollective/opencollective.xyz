@@ -230,7 +230,6 @@ export default function Transactions({
           accountAddresses={accountAddresses}
           transactions={filteredTransactions}
           tokens={selectedTokens}
-          timeRangeLabel={transactionsFilter.dateRange?.label || "All Time"}
         />
       )}
 

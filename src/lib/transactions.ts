@@ -82,10 +82,6 @@ export const getTransactionsForCollective = async (
   // Wait for all wallet processing to complete
   await Promise.all(
     (collectiveConfig.wallets as WalletConfig[]).map(async (wallet) => {
-      if (wallet.type === "opencollective") {
-        console.log(wallet);
-        openCollectiveSlug = wallet.collectiveSlug;
-      }
       if (wallet.type === "blockchain") {
         // Wait for all token processing within each wallet
         if (!wallet.chain) {
@@ -93,7 +89,7 @@ export const getTransactionsForCollective = async (
         }
         const tokenAddresses = getTokenAddressesFromSymbols(
           wallet.chain,
-          wallet.tokens
+          wallet.tokens.map((t) => t.symbol ?? "")
         );
         const txs = await getTransactions(
           wallet.chain,

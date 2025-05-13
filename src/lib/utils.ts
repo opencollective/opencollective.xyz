@@ -232,21 +232,24 @@ export const getPrimaryToken = (
   primaryCurrency: FiatCurrencySymbol
 ) => {
   const chain = getChainSlugFromChainId(chainId);
-  const chainTokens = tokens[chain];
+  if (!chain) return null;
+  const chainTokens = tokens[chain as keyof typeof tokens];
   const keys = Object.keys(chainTokens);
   for (const contractAddress of keys) {
-    const token = chainTokens[contractAddress as keyof typeof chainTokens];
+    const token = chainTokens[
+      contractAddress as keyof typeof chainTokens
+    ] as Token;
     if (!token) continue;
-    token.address = contractAddress;
+    token.address = contractAddress as Address;
     token.chain = chain;
     if (primaryCurrency === "USD") {
       if (token.symbol === "USDC") {
-        return token as Token;
+        return token;
       }
     }
     if (primaryCurrency === "EUR") {
       if (token.symbol === "EURE") {
-        return token as Token;
+        return token;
       }
     }
   }
@@ -447,28 +450,15 @@ export function getTotalsByTokenType(
   string,
   { inbound: number; outbound: number; internal: number }
 > | null {
-  if (!wallets) return null;
-  if (wallets.length === 0) return null;
+  if (!wallets || wallets.length === 0) return null;
+  const walletAddresses = wallets
+    .filter((w) => !!w.address)
+    .map((w) => w.address.toLowerCase() as Address);
 
-  const walletAddressesByChain: Record<number, Address[]> = {};
-  wallets
-    .filter((w) => {
-      return w.type === "blockchain" && w.address && w.address.length === 42;
-    })
-    .map((w) => {
-      const chainId = getChainIdFromChainSlug(w.chain);
-      if (!chainId) return;
-      walletAddressesByChain[chainId] = walletAddressesByChain[chainId] || [];
-      walletAddressesByChain[chainId].push(w.address.toLowerCase() as Address);
-    });
-
-  const totals = transactions.reduce((acc, tx) => {
-    if (!tx.token.symbol) {
-      return acc;
-    }
-    const tokenType = getTokenType(tx.token.symbol);
-
-    // Initialize token group if it doesn't exist
+  return transactions.reduce((acc, tx) => {
+    const tokenType = getTokenType(tx.token.symbol || "");
+    const transactionDirection = getTransactionDirection(tx, walletAddresses);
+    if (!transactionDirection || transactionDirection === "all") return acc;
     if (!acc[tokenType]) {
       acc[tokenType] = {
         inbound: 0,
@@ -476,23 +466,12 @@ export function getTotalsByTokenType(
         internal: 0,
       };
     }
-
-    const amount = Number(ethers.formatUnits(tx.value, tx.token.decimals));
-
-    const transactionDirection = getTransactionDirection(
-      tx,
-      walletAddressesByChain[tx.chainId]
+    const amount = Number(
+      ethers.formatUnits(tx.value, tx.token.decimals || 18)
     );
-    if (!transactionDirection) {
-      return acc;
-    }
-    // If the account is the recipient (to address), it's an inflow
     acc[tokenType][transactionDirection] += amount;
-
     return acc;
   }, {} as Record<string, { inbound: number; outbound: number; internal: number }>);
-
-  return totals;
 }
 
 export function getTransactionDirection(
@@ -559,14 +538,16 @@ export function computeTokenStats(
         totalVolume: 0,
       };
     }
-    const amount = Number(ethers.formatUnits(tx.value, tx.token.decimals));
+    const amount = Number(
+      ethers.formatUnits(tx.value, tx.token.decimals || 18)
+    );
     const direction = getTransactionDirection(
       tx,
       accountAddresses || [
         "0x0000000000000000000000000000000000000000" as Address,
       ]
     );
-    if (!direction) {
+    if (!direction || direction === "all") {
       return acc;
     }
     acc[tokenKey][direction].count += 1;
@@ -578,7 +559,9 @@ export function computeTokenStats(
     }
 
     acc[tokenKey].txCount += 1;
-    acc[tokenKey].totalVolume += amount;
+    if (acc[tokenKey].totalVolume !== undefined) {
+      acc[tokenKey].totalVolume += amount;
+    }
     return acc;
   }, {} as Record<string, TokenStats>);
 }

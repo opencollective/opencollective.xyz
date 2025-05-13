@@ -35,8 +35,8 @@ export default async function CollectivePage({
               end: new Date(),
               label: "All times",
             },
+            selectedTokens: tokens,
           }}
-          tokens={tokens}
           transactions={transactions}
           live={false}
           collectiveConfig={collectiveConfig}
