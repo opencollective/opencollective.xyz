@@ -2,9 +2,9 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-4 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[16px] row-start-2 items-center sm:items-start">
-        <div className="flex items-center w-full">
+        <div className="flex items-center w-full my-4">
           <Image
             className="dark:hidden"
             src="/opencollective-logo.svg"
@@ -75,7 +75,7 @@ export default function Home() {
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
           className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://discord.gg/Fepd7VSe9D"
+          href="https://discord.opencollective.xyz"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -88,6 +88,22 @@ export default function Home() {
             height={16}
           />
           Discord
+        </a>
+        <a
+          className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://gitcoin.opencollective.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            className="dark:invert"
+            aria-hidden
+            src="/gitcoin.svg"
+            alt="Gitcoin icon"
+            width={16}
+            height={16}
+          />
+          Gitcoin
         </a>
         <a
           className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"

@@ -11,6 +11,8 @@ export type TxId = HexString<64>;
 export type ChainId = number;
 export type Blockchain = "ethereum" | "bitcoin";
 export type AddressType = "address" | "tx";
+export type TransactionDirection = "inbound" | "outbound" | "internal" | "all";
+export type TokenType = "fiat" | "token";
 export type URI =
   | `ethereum:${ChainId}:address:${Address}`
   | `ethereum:${ChainId}:tx:${TxHash}`
@@ -37,7 +39,11 @@ export type TokenStats = {
     count: number;
     value: number;
   };
-  totalVolume: number;
+  internal: {
+    count: number;
+    value: number;
+  };
+  totalVolume?: number;
   netValue: number;
 };
 export interface Transaction {
@@ -95,9 +101,27 @@ export type ChainConfig = {
 
 export type WalletConfig = {
   type: "blockchain" | "opencollective";
+  chain: string;
   address: string;
-  tokens?: Token[];
+  tokens: string[]; // token symbols
   hostSlug?: string;
   collectiveSlug?: string;
   currency?: string;
+};
+
+export type CollectiveConfig = {
+  slug: string;
+  tokens?: Token[];
+  wallets: WalletConfig[];
+  primaryCurrency: string;
+  profile: ProfileData;
+};
+
+export type ProfileData = {
+  uri?: URI;
+  address?: Address | undefined;
+  name?: string;
+  about?: string;
+  picture?: string;
+  website?: string;
 };

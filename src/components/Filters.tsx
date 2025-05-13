@@ -1,3 +1,9 @@
+import { Button } from "@/components/ui/button";
+import { cn, getTransactionDirection } from "@/lib/utils";
+import { useState, useMemo } from "react";
+import { format, startOfMonth, endOfMonth, startOfToday } from "date-fns";
+import { truncateAddress } from "@/utils/crypto";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Calendar, ArrowLeftRight, ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -21,12 +26,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
 import { Check, Coins } from "lucide-react";
-import type { Address, Token, Transaction } from "@/types/index.d.ts";
-import { useState, useMemo } from "react";
-import { format, startOfMonth, endOfMonth, startOfToday } from "date-fns";
-import { truncateAddress } from "@/utils/crypto";
+import type {
+  Address,
+  Token,
+  TokenType,
+  Transaction,
+} from "@/types/index.d.ts";
 
 type DateRange = {
   start: Date | null;
@@ -35,20 +41,24 @@ type DateRange = {
 };
 
 export type Filter = {
-  dateRange: DateRange;
-  selectedTokens: Token[];
-  type: "in" | "out" | "all";
+  dateRange?: DateRange;
+  direction?: "inbound" | "outbound" | "internal" | "all";
+  amountRange?: undefined | [number, number];
+  chain?: string;
+  address?: Address;
+  tokenType?: TokenType;
+  selectedTokens?: Token[];
 };
 
 export default function Filters({
   availableTokens,
   transactions,
   onChange,
-  accountAddress,
+  accountAddresses,
 }: {
   availableTokens: Token[];
   transactions: Transaction[];
-  accountAddress: Address;
+  accountAddresses?: Address[];
   onChange: (filter: Filter) => void;
 }) {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -58,36 +68,51 @@ export default function Filters({
   });
   const [selectedTokens, setSelectedTokens] = useState<Token[]>([]);
   const [tokenSelectOpen, setTokenSelectOpen] = useState(false);
-  const [type, setType] = useState<"in" | "out" | "all">("all");
+  const [direction, setDirection] = useState<
+    "inbound" | "outbound" | "internal" | "all"
+  >("all");
+  const [amountRange, setAmountRange] = useState<undefined | [number, number]>(
+    undefined
+  );
 
   type TransactionStats = {
-    byMonth: Record<string, { all: number; in: number; out: number }>;
+    byMonth: Record<
+      string,
+      { all: number; inbound: number; outbound: number; internal: number }
+    >;
     byType: Record<string, number>;
-    total: { all: number; in: number; out: number };
+    total: { all: number; inbound: number; outbound: number; internal: number };
   };
 
   const transactionStats = useMemo(() => {
     return transactions.reduce(
       (acc, tx) => {
         const month = format(tx.timestamp * 1000, "MMMM yyyy");
-        acc.byMonth[month] = acc.byMonth[month] || { all: 0, in: 0, out: 0 };
+        acc.byMonth[month] = acc.byMonth[month] || {
+          all: 0,
+          inbound: 0,
+          outbound: 0,
+          internal: 0,
+        };
         acc.byMonth[month].all++;
         acc.total.all++;
-        if (accountAddress) {
-          const type = tx.from === accountAddress.toLowerCase() ? "out" : "in";
-          acc.byMonth[month][type]++;
-          acc.byType[type] = (acc.byType[type] || 0) + 1;
-          acc.total[type] = (acc.total[type] || 0) + 1;
+        if (accountAddresses && accountAddresses.length > 0) {
+          const direction = getTransactionDirection(tx, accountAddresses);
+          if (direction) {
+            acc.byMonth[month][direction]++;
+            acc.byType[direction] = (acc.byType[direction] || 0) + 1;
+            acc.total[direction] = (acc.total[direction] || 0) + 1;
+          }
         }
         return acc;
       },
       {
         byMonth: {},
-        byType: { in: 0, out: 0 },
-        total: { all: 0, in: 0, out: 0 },
+        byType: { inbound: 0, outbound: 0, internal: 0 },
+        total: { all: 0, inbound: 0, outbound: 0, internal: 0 },
       } as TransactionStats
     );
-  }, [transactions, accountAddress]);
+  }, [transactions, accountAddresses]);
 
   // Generate list of all the months since first transaction
   const monthOptions = useMemo(() => {
@@ -122,7 +147,7 @@ export default function Filters({
         end: monthEnd,
         label: monthLabel,
         txCount: transactionStats.byMonth[monthLabel]
-          ? transactionStats.byMonth[monthLabel][type]
+          ? transactionStats.byMonth[monthLabel][direction]
           : 0,
       });
 
@@ -135,11 +160,20 @@ export default function Filters({
     }
 
     return options.reverse();
-  }, [transactions, transactionStats, type]);
+  }, [transactions, transactionStats, direction]);
 
-  const updateType = (type: "in" | "out" | "all") => {
-    setType(type);
-    onChange({ dateRange, selectedTokens, type });
+  const getAmountRangeLabel = (range: undefined | [number, number]) => {
+    if (!range) return "All Amounts";
+    if (range[0] === 0) return `< ${range[1]}`;
+    if (range[1] === Infinity) return `> ${range[0]}`;
+    return `${range[0]} - ${range[1]}`;
+  };
+
+  const updateType = (
+    direction: "inbound" | "outbound" | "internal" | "all"
+  ) => {
+    setDirection(direction);
+    onChange({ dateRange, selectedTokens, direction, amountRange });
   };
 
   const updateDateRange = (dateRange: {
@@ -148,82 +182,89 @@ export default function Filters({
     label: string;
   }) => {
     setDateRange(dateRange);
-    onChange({ dateRange, selectedTokens, type });
+    onChange({ dateRange, selectedTokens, direction, amountRange });
   };
 
   const updateSelectedTokens = (selectedTokens: Token[]) => {
     setSelectedTokens(selectedTokens);
-    onChange({ dateRange, selectedTokens, type });
+    onChange({ dateRange, selectedTokens, direction, amountRange });
+  };
+
+  const updateAmountRange = (range: undefined | [number, number]) => {
+    setAmountRange(range);
+    onChange({ dateRange, selectedTokens, direction, amountRange: range });
   };
 
   return (
     <div className="flex flex-wrap items-center gap-4">
       {/* Date Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className="w-[200px] flex-row justify-start"
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            {dateRange.label}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[200px]">
-          <DropdownMenuLabel>Filter by Date</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() =>
-              updateDateRange({ start: null, end: null, label: "All Time" })
-            }
-          >
-            All Time
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() =>
-              updateDateRange({
-                start: startOfToday(),
-                end: new Date(),
-                label: "Today",
-              })
-            }
-          >
-            Today
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>By Month</DropdownMenuLabel>
-          {monthOptions.map((option) => (
-            <DropdownMenuItem
-              key={option.label}
-              onClick={() => updateDateRange(option)}
-              className="flex justify-between cursor-pointer"
+      {monthOptions.length > 1 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-[200px] flex-row justify-start"
             >
-              <span
-                className={
-                  transactionStats.byMonth[option.label]?.all > 0
-                    ? ""
-                    : "text-muted-foreground"
-                }
-              >
-                {option.label}
-              </span>
-              <span className="text-muted-foreground">{option.txCount}</span>
+              <Calendar className="mr-2 h-4 w-4" />
+              {dateRange.label}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[200px]">
+            <DropdownMenuLabel>Filter by Date</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() =>
+                updateDateRange({ start: null, end: null, label: "All Time" })
+              }
+            >
+              All Time
             </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() =>
+                updateDateRange({
+                  start: startOfToday(),
+                  end: new Date(),
+                  label: "Today",
+                })
+              }
+            >
+              Today
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>By Month</DropdownMenuLabel>
+            {monthOptions.map((option) => (
+              <DropdownMenuItem
+                key={option.label}
+                onClick={() => updateDateRange(option)}
+                className="flex justify-between cursor-pointer"
+              >
+                <span
+                  className={
+                    transactionStats.byMonth[option.label]?.all > 0
+                      ? ""
+                      : "text-muted-foreground"
+                  }
+                >
+                  {option.label}
+                </span>
+                <span className="text-muted-foreground">{option.txCount}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Type Filter */}
-      {accountAddress && (
+      {accountAddresses && accountAddresses.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               className="w-[140px] flex-row justify-start"
             >
-              {type === "all" ? (
+              {direction === "all" ? (
                 <div className="flex justify-between w-full items-center">
                   <div className="flex flex-row items-center gap-2">
                     <ArrowLeftRight className="mr-1 h-4 w-4" />
@@ -235,14 +276,14 @@ export default function Filters({
                       : transactionStats.byMonth[dateRange.label]?.all}
                   </span>
                 </div>
-              ) : type === "in" ? (
+              ) : direction === "inbound" ? (
                 <div className="flex justify-between w-full items-center">
                   <ArrowLeft className="mr-1 h-4 w-4" />
                   Inbound
                   <span className="text-muted-foreground">
                     {dateRange.label === "All Time"
-                      ? transactionStats.total.in
-                      : transactionStats.byMonth[dateRange.label]?.in}
+                      ? transactionStats.total.inbound
+                      : transactionStats.byMonth[dateRange.label]?.inbound}
                   </span>
                 </div>
               ) : (
@@ -251,8 +292,8 @@ export default function Filters({
                   Outbound
                   <span className="text-muted-foreground ml-2">
                     {dateRange.label === "All Time"
-                      ? transactionStats.total.out
-                      : transactionStats.byMonth[dateRange.label]?.out}
+                      ? transactionStats.total.outbound
+                      : transactionStats.byMonth[dateRange.label]?.outbound}
                   </span>
                 </div>
               )}
@@ -262,7 +303,7 @@ export default function Filters({
             <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => setType("all")}
+              onClick={() => setDirection("all")}
               className="flex justify-between"
             >
               All
@@ -273,25 +314,25 @@ export default function Filters({
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => updateType("in")}
+              onClick={() => updateType("inbound")}
               className="flex justify-between"
             >
               Inbound
               <span className="text-muted-foreground">
                 {dateRange.label === "All Time"
-                  ? transactionStats.total.in
-                  : transactionStats.byMonth[dateRange.label]?.in || 0}
+                  ? transactionStats.total.inbound
+                  : transactionStats.byMonth[dateRange.label]?.inbound || 0}
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => updateType("out")}
+              onClick={() => updateType("outbound")}
               className="flex justify-between"
             >
               Outbound
               <span className="text-muted-foreground">
                 {dateRange.label === "All Time"
-                  ? transactionStats.total.out
-                  : transactionStats.byMonth[dateRange.label]?.out || 0}
+                  ? transactionStats.total.outbound
+                  : transactionStats.byMonth[dateRange.label]?.outbound || 0}
               </span>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -312,7 +353,6 @@ export default function Filters({
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0" align="start">
               <Command>
-                <CommandInput placeholder="Search tokens..." />
                 <CommandList>
                   <CommandEmpty>No tokens found.</CommandEmpty>
                   <CommandGroup>
@@ -346,7 +386,7 @@ export default function Filters({
                         />
                         {token.symbol}{" "}
                         <span className="text-muted-foreground text-xs">
-                          ({truncateAddress(token.address)})
+                          ({token.chain})
                         </span>
                       </CommandItem>
                     ))}
@@ -357,6 +397,47 @@ export default function Filters({
           </Popover>
         </>
       )}
+
+      {/* Amount Filter */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-[140px] flex-row justify-start"
+          >
+            <Coins className="mr-2 h-4 w-4" />
+            {getAmountRangeLabel(amountRange)}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[140px]">
+          <DropdownMenuLabel>Filter by Amount</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateAmountRange(undefined)}
+          >
+            All Amounts
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateAmountRange([0, 50])}
+          >
+            {"< 50"}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateAmountRange([50, 500])}
+          >
+            50 - 500
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateAmountRange([500, Infinity])}
+          >
+            500+
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

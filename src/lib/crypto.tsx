@@ -9,7 +9,8 @@ setInterval(() => {
 export async function getTransactions(
   chain: string,
   contractaddress: string | null,
-  address?: string | null
+  address?: string | null,
+  type: "token" | "native" = "token"
 ): Promise<EtherscanTransfer[]> {
   const chainConfig: ChainConfig = chains[chain as keyof typeof chains];
   const apikey = process.env[`${chain?.toUpperCase()}_ETHERSCAN_API_KEY`];
@@ -27,16 +28,16 @@ export async function getTransactions(
     throw new Error(`No explorer API found for chain ${chain}`);
   }
 
-  const cacheKey = `${chain}:${contractaddress}:${address}`;
+  const cacheKey = `${chain}:${contractaddress}:${address}:${type}`;
   if (cache[cacheKey]) {
     console.log(">>> cache hit", cacheKey);
     return cache[cacheKey];
   }
-  console.log(">>> getTransactions", chain, contractaddress, address);
+  console.log(">>> getTransactions", chain, contractaddress, address, type);
 
   const params = new URLSearchParams({
     module: "account",
-    action: "tokentx",
+    action: type === "token" ? "tokentx" : "txlist",
     startblock: "0",
     endblock: "99999999",
     sort: "desc",
@@ -47,7 +48,7 @@ export async function getTransactions(
   if (address) {
     params.set("address", address);
   }
-  if (contractaddress) {
+  if (contractaddress && type === "token") {
     params.set("contractaddress", contractaddress);
   }
 
@@ -60,11 +61,11 @@ export async function getTransactions(
     return data.result;
   }
   if (data.status === "0") {
-    console.error(">>> error fetching transactions", data.message);
+    console.error(">>> error fetching transactions", apicall, data.message);
     return data.result;
   }
-  console.error(">>> error fetching transactions", data);
+  console.error(">>> error fetching transactions", apicall, data);
   throw new Error(
-    `Failed to fetch transactions for ${chain}:${contractaddress}:${address}`
+    `Failed to fetch transactions for ${chain}:${contractaddress}:${address}:${type}`
   );
 }

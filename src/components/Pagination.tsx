@@ -23,6 +23,9 @@ export default function Pagination({
         value={txsPerPage}
         onChange={(e) => onTxsPerPageChange(Number(e.target.value))}
       >
+        {![10, 20, 50, 100].includes(txsPerPage) && (
+          <option value={5}>5</option>
+        )}
         <option value={10}>10</option>
         <option value={20}>20</option>
         <option value={50}>50</option>

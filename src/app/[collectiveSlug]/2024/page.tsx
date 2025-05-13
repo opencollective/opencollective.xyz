@@ -7,10 +7,11 @@ import { getCollectiveConfig } from "@/lib/config";
 export default async function CollectivePage({
   params,
 }: {
-  params: Promise<{ collectiveSlug: string }>;
+  params: Promise<{ collectiveSlug: string; year: string }>;
 }) {
-  const { collectiveSlug } = await params;
+  const { collectiveSlug, year } = await params;
   const collectiveConfig = getCollectiveConfig(collectiveSlug);
+
   if (!collectiveConfig) {
     return <div>Collective not found</div>;
   }
@@ -55,22 +56,22 @@ export default async function CollectivePage({
       <h1>{collectiveConfig.profile.name}</h1>
       <div>
         <h2>Community Activity by Month</h2>
-        {pastMonths.map((month, i) => (
-          <MonthlySection
-            key={month.label}
-            filter={{
-              dateRange: {
-                start: month.start,
-                end: month.end,
-                label: month.label,
-              },
-              selectedTokens: tokens,
-            }}
-            transactions={getMonthTransactions(month.start, month.end)}
-            live={i === 0}
-            collectiveConfig={collectiveConfig}
-          />
-        ))}
+        {pastMonths.map(
+          (currentMonth, i) =>
+            currentMonth.year === parseInt(year) && (
+              <MonthlySection
+                key={currentMonth.label}
+                label={currentMonth.label}
+                tokens={tokens}
+                transactions={getMonthTransactions(
+                  currentMonth.start,
+                  currentMonth.end
+                )}
+                live={i === 0}
+                collectiveConfig={collectiveConfig}
+              />
+            )
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,22 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatInTimeZone } from "date-fns-tz";
-import { ChainConfig, URI } from "@/types";
+import {
+  Address,
+  ChainConfig,
+  ProfileData,
+  Token,
+  TokenStats,
+  Transaction,
+  TransactionDirection,
+  URI,
+  WalletConfig,
+} from "@/types";
+import { NostrNote } from "@/providers/NostrProvider";
 import { npubEncode } from "nostr-tools/nip19";
 import chains from "@/chains.json";
+import { ethers } from "ethers";
+import { getTokensForWallet } from "./config";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,6 +27,7 @@ export const formatNumber = (
   precision?: number,
   short = true
 ) => {
+  if (!number) return "0";
   let num = number,
     prec = precision || 2,
     suffix = "";
@@ -39,6 +53,11 @@ export const formatNumber = (
       suffix = "K";
     }
   }
+
+  if (num < 0.01) {
+    prec = 4;
+  }
+
   return (
     num.toLocaleString(locale, {
       minimumFractionDigits: 0,
@@ -49,7 +68,6 @@ export const formatNumber = (
 
 export function formatTimestamp(ts: number, format = "MMM d HH:mm"): string {
   if (!ts) {
-    console.error("formatTimestamp: ts is undefined");
     return "";
   }
   return formatInTimeZone(
@@ -186,4 +204,310 @@ export function decomposeURI(uri: string): URIObject {
   } else {
     throw new Error("Invalid URI");
   }
+}
+
+type TokenType = "token" | "fiat";
+
+export type LeaderboardEntry = {
+  uri: URI;
+  txCount: number;
+  txVolume: Record<TransactionDirection, number>;
+  transactions: Transaction[];
+};
+export type Leaderboard = LeaderboardEntry[];
+
+const getFxRate = (fromToken: Token, toToken: Token, date: Date) => {
+  return 1;
+};
+
+const normalizeAmount = (
+  fromToken: Token,
+  toToken: Token,
+  amount: number,
+  date: Date
+) => {
+  if (fromToken.symbol === toToken.symbol) {
+    return amount;
+  }
+  const fxRate = getFxRate(fromToken, toToken, date);
+  return amount * fxRate;
+};
+
+const getTokenType = (tokenSymbol: string): TokenType => {
+  if (["CHT"].includes(tokenSymbol)) return "token";
+  else return "fiat";
+};
+
+export function getLeaderboard(
+  transactions: Transaction[],
+  direction?: TransactionDirection,
+  tokenType?: TokenType
+): Leaderboard {
+  const result: Leaderboard = [];
+  const entriesByUri = new Map<string, LeaderboardEntry>();
+
+  const processTransaction = (
+    tx: Transaction,
+    direction: TransactionDirection
+  ) => {
+    const uri = generateURI("ethereum", {
+      chainId: tx.chainId,
+      address: direction === "inbound" ? tx.from : tx.to,
+    });
+
+    const amount = Number(ethers.formatUnits(tx.value, tx.token.decimals));
+
+    if (!entriesByUri.has(uri)) {
+      entriesByUri.set(uri, {
+        uri,
+        txCount: 0,
+        txVolume: {
+          inbound: 0,
+          outbound: 0,
+          internal: 0,
+          all: 0,
+        },
+        transactions: [],
+      });
+    }
+
+    const entry = entriesByUri.get(uri)!;
+    entry.txCount += 1;
+    entry.txVolume[direction] += amount;
+    entry.txVolume["all"] += amount;
+    entry.transactions.push(tx);
+  };
+
+  transactions.forEach((tx) => {
+    if (direction === "inbound") {
+      processTransaction(tx, "inbound");
+    } else if (direction === "outbound") {
+      processTransaction(tx, "outbound");
+    } else {
+      processTransaction(tx, "inbound");
+      processTransaction(tx, "outbound");
+    }
+  });
+
+  entriesByUri.forEach((entry) => {
+    result.push(entry);
+  });
+
+  // Convert map to array and sort by txVolume descending
+  return result.sort(
+    (a, b) =>
+      b.txVolume.inbound +
+      b.txVolume.outbound -
+      (a.txVolume.inbound + a.txVolume.outbound)
+  );
+}
+
+export const generateAvatar = (address: string) => {
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`;
+};
+
+export const getAddressFromURI = (uri: string): Address => {
+  return uri.substring(uri.lastIndexOf(":") + 1) as Address;
+};
+
+export const getChainIdFromURI = (uri: string): number | undefined => {
+  if (uri && uri.startsWith("ethereum")) {
+    return parseInt(uri.split(":")[1]);
+  }
+  return undefined;
+};
+
+export const getChainSlugFromChainId = (
+  chainId?: number
+): string | undefined => {
+  if (!chainId) return undefined;
+  return Object.keys(chains).find(
+    (key) => chains[key as keyof typeof chains].id === chainId
+  );
+};
+
+export const getProfileFromNote = (
+  note: NostrNote
+): ProfileData | undefined => {
+  if (note && note.tags?.length > 0) {
+    const uri = note.tags.find((t) => t[0] === "i")?.[1];
+    if (!uri) return undefined;
+    const address = getAddressFromURI(uri);
+    return {
+      uri: uri as URI,
+      address,
+      name: note.content || "",
+      about: note.tags.find((t) => t[0] === "about")?.[1] || "",
+      picture: note.tags.find((t) => t[0] === "picture")?.[1] || "",
+      website: note.tags.find((t) => t[0] === "website")?.[1] || "",
+    };
+  }
+};
+
+export function filterTransactions(
+  transactions: Transaction[],
+  tokenType: TokenType,
+  direction: TransactionDirection,
+  wallets: WalletConfig[] | undefined
+) {
+  if (!wallets) return transactions;
+  if (wallets.length === 0) return transactions;
+  const walletAddresses = wallets
+    .filter((w) => !!w.address)
+    .map((w) => w.address.toLowerCase());
+
+  const txs = transactions.filter((tx) => {
+    if (!tx.token.symbol) return false;
+    if (getTokenType(tx.token.symbol) !== tokenType) return false;
+
+    if (direction === "inbound") {
+      return (
+        walletAddresses.includes(tx.to.toLowerCase()) &&
+        !walletAddresses.includes(tx.from.toLowerCase())
+      );
+    }
+    if (direction === "outbound") {
+      return (
+        walletAddresses.includes(tx.from.toLowerCase()) &&
+        !walletAddresses.includes(tx.to.toLowerCase())
+      );
+    }
+    if (direction === "internal") {
+      return (
+        walletAddresses.includes(tx.to.toLowerCase()) ||
+        walletAddresses.includes(tx.from.toLowerCase())
+      );
+    }
+    return false;
+  });
+  return txs;
+}
+
+export function getTokenTotals(
+  transactions: Transaction[],
+  wallets: WalletConfig[]
+) {
+  if (!wallets) return null;
+  if (wallets.length === 0) return null;
+  const totals = transactions.reduce((acc, tx) => {
+    if (!tx.token.symbol) {
+      return acc;
+    }
+    const tokenType = getTokenType(tx.token.symbol);
+
+    // Initialize token group if it doesn't exist
+    if (!acc[tokenType]) {
+      acc[tokenType] = {
+        totalIn: 0,
+        totalOut: 0,
+      };
+    }
+
+    const amount = Number(ethers.formatUnits(tx.value, tx.token.decimals));
+
+    const walletAddresses = wallets
+      .filter((w) => {
+        const walletTokens = getTokensForWallet(w);
+        return walletTokens.some(
+          (t) => t.address?.toLowerCase() === tx.token.address?.toLowerCase()
+        );
+      })
+      .filter((w) => !!w.address)
+      .map((w) => w.address.toLowerCase());
+
+    // If the account is the recipient (to address), it's an inflow
+    if (walletAddresses.includes(tx.to.toLowerCase())) {
+      acc[tokenType].totalIn += amount;
+    }
+    // If the account is the sender (from address), it's an outflow
+    if (walletAddresses.includes(tx.from.toLowerCase())) {
+      acc[tokenType].totalOut += amount;
+    }
+
+    return acc;
+  }, {} as Record<string, { totalIn: number; totalOut: number }>);
+
+  return totals;
+}
+
+export function getTransactionDirection(
+  tx: Transaction,
+  accountAddresses: Address[]
+): TransactionDirection | undefined {
+  if (
+    !accountAddresses ||
+    accountAddresses.length === 0 ||
+    !accountAddresses.map
+  ) {
+    return undefined;
+  }
+  const addresses = accountAddresses
+    .filter((a) => !!a) // make sure no undefined addresses
+    .map((a) => a.toLowerCase());
+  if (addresses.includes(tx.to.toLowerCase())) {
+    if (addresses.includes(tx.from.toLowerCase())) {
+      return "internal";
+    } else {
+      return "inbound";
+    }
+  } else if (addresses.includes(tx.from.toLowerCase())) {
+    return "outbound";
+  }
+}
+
+export function computeTokenStats(
+  transactions: Transaction[],
+  accountAddresses?: Address[],
+  tokens?: Token[]
+): Record<Address, TokenStats> {
+  return transactions.reduce((acc, tx) => {
+    const tokenKey = `${tx.token.chain}:${tx.token.address}`;
+    const token = tokens?.find(
+      (t) => t.address === tx.token.address && t.chain === tx.token.chain
+    );
+    if (!token) {
+      return acc;
+    }
+    if (!acc[tokenKey]) {
+      acc[tokenKey] = {
+        token,
+        txCount: 0,
+        inbound: {
+          count: 0,
+          value: 0,
+        },
+        outbound: {
+          count: 0,
+          value: 0,
+        },
+        internal: {
+          count: 0,
+          value: 0,
+        },
+        netValue: 0,
+        totalVolume: 0,
+      };
+    }
+    const amount = Number(ethers.formatUnits(tx.value, tx.token.decimals));
+    const direction = getTransactionDirection(
+      tx,
+      accountAddresses || [
+        "0x0000000000000000000000000000000000000000" as Address,
+      ]
+    );
+    if (!direction) {
+      return acc;
+    }
+    acc[tokenKey][direction].count += 1;
+    acc[tokenKey][direction].value += amount;
+    if (direction === "inbound") {
+      acc[tokenKey].netValue += amount;
+    } else if (direction === "outbound") {
+      acc[tokenKey].netValue -= amount;
+    }
+
+    acc[tokenKey].txCount += 1;
+    acc[tokenKey].totalVolume += amount;
+    return acc;
+  }, {} as Record<string, TokenStats>);
 }

@@ -19,10 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
       "@/config.json": ["./config.json"],
+      "@/tokens.json": ["./tokens.json"],
       "@/relays.json": ["./relays.json"],
-      "@/chains.json": ["./chains.json"]
+      "@/chains.json": ["./chains.json"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
