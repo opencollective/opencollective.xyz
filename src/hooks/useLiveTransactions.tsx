@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { JsonRpcProvider, WebSocketProvider, Log, ethers } from "ethers";
 import chains from "@/chains.json";
 import { Address, ChainConfig, Transaction } from "@/types";
@@ -257,7 +257,7 @@ export function useLiveTransactions({
         [streamKey]: false,
       }));
     },
-    []
+    [intervalId]
   );
 
   return {
@@ -265,5 +265,6 @@ export function useLiveTransactions({
     connectionStatus,
     skippedTransactions,
     start,
+    stop,
   };
 }

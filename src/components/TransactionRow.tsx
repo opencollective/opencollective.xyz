@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import Link from "next/link";
 import { Edit } from "lucide-react";

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { cn, getTransactionDirection } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, startOfToday } from "date-fns";
-import { truncateAddress } from "@/utils/crypto";
 
 import {
   DropdownMenu,
@@ -22,7 +21,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";

@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { TransactionRow } from "@/components/TransactionRow";
 import { isWithinInterval } from "date-fns";
 import { Loader2, X } from "lucide-react";
-import type { Address, TokenStats, URI, Transaction, Token } from "@/types";
+import type { Address, URI, Transaction } from "@/types";
 import { useNostr } from "@/providers/NostrProvider";
 import StatsCards from "./StatsCards";
 import Filters, { type Filter } from "./Filters";
 import { computeTokenStats, generateURI } from "@/lib/utils";
 import Pagination from "./Pagination";
-import { useLiveTransactions } from "@/hooks/useLiveTransactions";
+import { ethers } from "ethers";
 
 interface Props {
   transactions: Transaction[];
@@ -207,7 +207,7 @@ export default function Transactions({
 
   const totalPages = Math.ceil(filteredTransactions.length / txsPerPage);
   const selectedTokens =
-    transactionsFilter.selectedTokens.length > 0
+    (transactionsFilter.selectedTokens || []).length > 0
       ? transactionsFilter.selectedTokens
       : availableTokens.length === 1
       ? availableTokens
@@ -225,12 +225,12 @@ export default function Transactions({
       )}
 
       {/* Stats Cards */}
-      {selectedTokens.length > 0 && (
+      {selectedTokens && selectedTokens.length > 0 && (
         <StatsCards
           accountAddresses={accountAddresses}
           transactions={filteredTransactions}
           tokens={selectedTokens}
-          timeRangeLabel={transactionsFilter.dateRange.label}
+          timeRangeLabel={transactionsFilter.dateRange?.label || "All Time"}
         />
       )}
 

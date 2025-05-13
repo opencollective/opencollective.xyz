@@ -1,37 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Coins,
-  ListChecks,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Sigma,
-} from "lucide-react";
-import { cn, computeTokenStats, formatTimestamp } from "@/lib/utils";
-import { ethers } from "ethers";
-import { truncateAddress } from "@/utils/crypto";
+import { computeTokenStats } from "@/lib/utils";
 import { useMemo } from "react";
-import { formatNumber } from "@/lib/utils";
 import type { Transaction, Token, Address } from "@/types";
 import CryptoCardCompact from "./ui/CryptoCardCompact";
-
-interface TokenStats {
-  received: number;
-  spent: number;
-  net: number;
-  token: Token;
-}
 
 export default function StatsCards({
   transactions,
   accountAddresses = [
     "0x0000000000000000000000000000000000000000",
   ] as Address[],
-  timeRangeLabel,
   tokens,
 }: {
   transactions: Transaction[];
   accountAddresses?: Address[];
-  timeRangeLabel: string;
   tokens: Token[];
 }) {
   const stats = useMemo(
@@ -43,7 +23,7 @@ export default function StatsCards({
     <div className="flex flex-wrap gap-4">
       {Object.entries(stats)
         .filter(
-          ([tokenAddress, stats]) =>
+          ([, stats]) =>
             stats.txCount > 0 &&
             (stats.inbound.value > 0 || stats.outbound.value > 0)
         )

@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/avatar";
 import {
   generateAvatar,
-  generateURI,
   getAddressFromURI,
   getChainIdFromURI,
   getChainSlugFromChainId,

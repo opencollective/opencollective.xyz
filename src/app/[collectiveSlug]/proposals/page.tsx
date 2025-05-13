@@ -1,9 +1,3 @@
-import config from "@/config.json";
-import MonthlySection from "@/components/MonthlySection";
-import {
-  getTransactionsForCollective,
-  getUniqueTokensFromTransactions,
-} from "@/lib/transactions";
 import { getCollectiveConfig } from "@/lib/config";
 export default async function CollectivePage({
   params,

@@ -13,7 +13,7 @@ import Avatar from "./Avatar";
 import { useMemo } from "react";
 import { truncateAddress } from "@/utils/crypto.server";
 
-export default function Leaderboard({
+export default function LeaderboardComponent({
   onClick,
   transactions,
   direction,
@@ -50,10 +50,10 @@ export default function Leaderboard({
     );
   });
 
-  const { notesByURI, subscribeToNotesByURI } = useNostr();
+  const { subscribeToNotesByURI } = useNostr();
 
   const leaderboard: Leaderboard | null = useMemo(
-    () => getLeaderboard(transactions, direction, tokenType),
+    () => getLeaderboard(transactions, "USD", direction, tokenType),
     [transactions, direction, tokenType]
   );
   if (!leaderboard) {

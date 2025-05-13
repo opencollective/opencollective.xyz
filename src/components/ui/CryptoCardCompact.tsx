@@ -1,4 +1,4 @@
-import { ArrowUp, ArrowDown, DollarSign } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 
 interface CryptoCardProps {

@@ -22,11 +22,9 @@ import relays from "@/relays.json";
 import { decode, nsecEncode, npubEncode } from "nostr-tools/nip19";
 import { db } from "@/services/db";
 import { insertEventIntoDescendingList } from "nostr-tools/utils";
-import { ProfileData, URI } from "@/types";
 import { NostrUserBox } from "@/components/NostrUserBox";
 import NostrEditProfileModal from "@/components/NostrEditProfileModal";
-import { generateURI, getAddressFromURI, getChainIdFromURI } from "@/lib/utils";
-import chains from "@/chains.json";
+import type { ProfileData, URI } from "@/types";
 
 export type NostrNote = {
   id: string;
@@ -366,7 +364,9 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       if (newURIs.length === 0) return;
 
       const cachedEvents = await db?.getNostrEventsByURIs(newURIs);
-      addNostrEventsToState(cachedEvents);
+      if (cachedEvents) {
+        addNostrEventsToState(cachedEvents);
+      }
 
       Array.from(subscriptionGroupsToUpdate).forEach((groupIndex) => {
         const groupURIs = Object.keys(subscribedURIs.current).filter(

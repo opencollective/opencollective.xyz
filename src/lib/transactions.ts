@@ -69,8 +69,6 @@ export const getTransactionsForCollective = async (
     });
   };
 
-  let openCollectiveSlug = null;
-
   const tokens = [];
   await Promise.all(
     collectiveConfig.tokens?.map(async (token) => {

@@ -1,5 +1,5 @@
 type HexString<Length extends number> = `0x${string}` & { length: Length };
-export type Address = HexString<42>;
+export type Address = Lowercase<HexString<42>>;
 
 type BitcoinAddress =
   | `1${string}` // Legacy addresses
@@ -18,6 +18,20 @@ export type URI =
   | `ethereum:${ChainId}:tx:${TxHash}`
   | `bitcoin:address:${BitcoinAddress}`
   | `bitcoin:tx:${TxId}`;
+
+export type FiatCurrencySymbol =
+  | "USD"
+  | "EUR"
+  | "GBP"
+  | "JPY"
+  | "CHF"
+  | "CAD"
+  | "AUD"
+  | "NZD"
+  | "CNY"
+  | "HKD"
+  | "SGD"
+  | "INR";
 
 export type Token = {
   name?: string;
@@ -103,7 +117,7 @@ export type WalletConfig = {
   type: "blockchain" | "opencollective";
   chain: string;
   address: string;
-  tokens: string[]; // token symbols
+  tokens: Token[]; // token symbols
   hostSlug?: string;
   collectiveSlug?: string;
   currency?: string;

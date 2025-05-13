@@ -1,4 +1,8 @@
-import { filterTransactions, formatNumber, getTokenTotals } from "@/lib/utils";
+import {
+  filterTransactions,
+  formatNumber,
+  getTotalsByTokenType,
+} from "@/lib/utils";
 import {
   Transaction,
   CollectiveConfig,
@@ -40,7 +44,7 @@ export default function SideSummary({
   }) => void;
 }) {
   const totals = useMemo(
-    () => getTokenTotals(transactions, collectiveConfig.wallets),
+    () => getTotalsByTokenType(transactions, collectiveConfig.wallets),
     [transactions, collectiveConfig.wallets]
   );
   console.log(">>> totals", totals);
@@ -58,7 +62,7 @@ export default function SideSummary({
             <h2 className="text-lg font-light mt-2 mb-2 ml-0">Money In</h2>
             <p className="text-xl font-light text-green-400">
               + {getShortSymbol(collectiveConfig.primaryCurrency)}
-              {formatNumber(totals["fiat"].totalIn)}
+              {formatNumber(totals["fiat"].inbound)}
             </p>
             <Leaderboard
               tokenType="fiat"
@@ -84,7 +88,7 @@ export default function SideSummary({
             <h2 className="text-lg font-light mt-2 mb-2 ml-0">Money Out</h2>
             <p className="text-xl font-light text-pink-400">
               - {getShortSymbol(collectiveConfig.primaryCurrency)}
-              {formatNumber(totals["fiat"].totalOut)}
+              {formatNumber(totals["fiat"].outbound)}
             </p>
             <Leaderboard
               tokenType="fiat"
@@ -109,7 +113,7 @@ export default function SideSummary({
           <div>
             <h2 className="text-lg font-light mt-2 mb-2 ml-0">Tokens Issued</h2>
             <p className="text-xl font-light">
-              {formatNumber(totals["token"].totalOut)}
+              {formatNumber(totals["token"].outbound)}
             </p>
             <Leaderboard
               tokenType="token"
@@ -136,7 +140,7 @@ export default function SideSummary({
               Tokens Redeemed
             </h2>
             <p className="text-xl font-light">
-              {formatNumber(totals["token"].totalIn)}
+              {formatNumber(totals["token"].inbound)}
             </p>
             <Leaderboard
               tokenType="token"

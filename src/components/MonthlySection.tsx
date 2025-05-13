@@ -3,7 +3,6 @@
 import {
   Address,
   CollectiveConfig,
-  Token,
   TokenType,
   Transaction,
   TransactionDirection,
@@ -17,6 +16,7 @@ import { getWallets } from "@/lib/config";
 import { generateURI, getAddressFromURI } from "@/lib/utils";
 import type { Filter } from "./Filters";
 import AddressInfo from "./AddressInfo";
+import { useRouter } from "next/navigation";
 
 export default function MonthlySection({
   transactions: initialTransactions,
@@ -31,6 +31,7 @@ export default function MonthlySection({
   limit?: number;
   live?: boolean;
 }) {
+  const router = useRouter();
   console.log(">>> MonthlySection component: filter", filter);
 
   const [transactions, setTransactions] =

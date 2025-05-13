@@ -1,19 +1,21 @@
 import {
   computeTokenStats,
-  getTokenTotals,
+  getTotalsByTokenType,
   getLeaderboard,
   generateURI,
+  getPrimaryToken,
 } from "./utils";
 import { Transaction, WalletConfig, Address, TxHash, Token } from "@/types";
 import { parseEther, parseUnits } from "ethers";
 import { describe, test, expect } from "@jest/globals";
 
-describe("getTokenTotals", () => {
+describe("getTotalsByTokenType", () => {
   // Sample wallet configs from config.json
   const wallets: WalletConfig[] = [
     {
       type: "blockchain",
       address: "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf" as Address,
+      chain: "gnosis",
       tokens: [
         {
           symbol: "EURe",
@@ -28,6 +30,7 @@ describe("getTokenTotals", () => {
     {
       type: "blockchain",
       address: "0x0000000000000000000000000000000000000000" as Address,
+      chain: "celo",
       tokens: [
         {
           symbol: "CHT",
@@ -112,27 +115,29 @@ describe("getTokenTotals", () => {
   ];
 
   test("should correctly calculate token totals for multiple tokens", () => {
-    const totals = getTokenTotals(transactions, wallets);
+    const totals = getTotalsByTokenType(transactions, wallets);
 
     expect(totals).toEqual({
       token: {
-        totalIn: 500,
-        totalOut: 200,
+        inbound: 500,
+        outbound: 200,
+        internal: 0,
       },
       fiat: {
-        totalIn: 100,
-        totalOut: 30,
+        inbound: 100,
+        outbound: 30,
+        internal: 0,
       },
     });
   });
 
   test("should return null when no wallets are provided", () => {
-    const result = getTokenTotals(transactions, []);
+    const result = getTotalsByTokenType(transactions, []);
     expect(result).toBeNull();
   });
 
   test("should return null when wallets is undefined", () => {
-    const result = getTokenTotals(
+    const result = getTotalsByTokenType(
       transactions,
       undefined as unknown as WalletConfig[]
     );
@@ -157,11 +162,12 @@ describe("getTokenTotals", () => {
       },
     };
 
-    const result = getTokenTotals([unknownTransaction], wallets);
+    const result = getTotalsByTokenType([unknownTransaction], wallets);
     expect(result).toEqual({
       fiat: {
-        totalIn: 0,
-        totalOut: 0,
+        inbound: 0,
+        outbound: 0,
+        internal: 0,
       },
     });
   });
@@ -205,9 +211,9 @@ describe("computeTokenStats", () => {
   ];
 
   test("should correctly compute token statistics", () => {
-    const stats = computeTokenStats(transactions, testAddress, [testToken]);
+    const stats = computeTokenStats(transactions, [testAddress], [testToken]);
 
-    const tokenKey = testToken.address;
+    const tokenKey = `${testToken.chain}:${testToken.address}`;
     expect(stats[tokenKey]).toBeDefined();
     expect(stats[tokenKey]).toEqual({
       token: testToken,
@@ -251,23 +257,25 @@ describe("computeTokenStats", () => {
 
     const stats = computeTokenStats(
       [...transactions, txWithUnknownToken],
-      testAddress,
+      [testAddress],
       [testToken]
     );
 
     // Should only have stats for testToken
     expect(Object.keys(stats)).toHaveLength(1);
-    expect(stats[unknownToken.address]).toBeUndefined();
-    expect(stats[testToken.address]).toBeDefined();
+    expect(
+      stats[`${unknownToken.chain}:${unknownToken.address}`]
+    ).toBeUndefined();
+    expect(stats[`${testToken.chain}:${testToken.address}`]).toBeDefined();
   });
 
   test("should handle empty transactions array", () => {
-    const stats = computeTokenStats([], testAddress, [testToken]);
+    const stats = computeTokenStats([], [testAddress], [testToken]);
     expect(stats).toEqual({});
   });
 
   test("should handle empty tokens array", () => {
-    const stats = computeTokenStats(transactions, testAddress, []);
+    const stats = computeTokenStats(transactions, [testAddress], []);
     expect(stats).toEqual({});
   });
 
@@ -335,11 +343,13 @@ describe("computeTokenStats", () => {
       },
     ];
 
-    const stats = computeTokenStats(multipleTransactions, testAddress, [
-      testToken,
-    ]);
+    const stats = computeTokenStats(
+      multipleTransactions,
+      [testAddress],
+      [testToken]
+    );
 
-    const tokenKey = testToken.address;
+    const tokenKey = `${testToken.chain}:${testToken.address}`;
     expect(stats[tokenKey]).toBeDefined();
     expect(stats[tokenKey]).toEqual({
       token: testToken,
@@ -435,15 +445,19 @@ describe("getLeaderboard", () => {
     },
   ];
 
-  test("should correctly compute leaderboard with multiple tokens and addresses", () => {
-    const leaderboard = getLeaderboard(transactions);
+  test("should return the token for the primary currency", () => {
+    const token = getPrimaryToken(42220, "USD");
+    expect(token).toBeDefined();
+    expect(token?.symbol).toBe("USDC");
+  });
 
+  test("should correctly compute leaderboard with multiple tokens and addresses", () => {
+    const leaderboard = getLeaderboard(transactions, "USD");
     // All tokens in the test data are fiat tokens except CELO
-    expect(leaderboard.recipients.fiat).toBeDefined();
-    expect(leaderboard.sources.fiat).toBeDefined();
+    expect(leaderboard.length).toBe(6);
 
     // Check recipients
-    const recipientAddresses = {
+    const uris = {
       first: generateURI("ethereum", {
         chainId: 1,
         address: "0x371ca2c8f1d02864c7306e5e5ed5dc6edf2dd19c",
@@ -454,34 +468,12 @@ describe("getLeaderboard", () => {
       }),
     };
 
-    // The first recipient should be the one with highest total (DAI + USDC)
-    expect(leaderboard.recipients.fiat[0][0]).toBe(recipientAddresses.second);
-    expect(leaderboard.recipients.fiat[0][1]).toBeCloseTo(15); // 10 DAI + 5 USDC
+    const first = leaderboard.find((item) => item.uri === uris.first);
+    expect(first).toBeDefined();
+    expect(first?.txVolume.inbound).toBe(15);
 
-    // Check sources
-    const sourceAddresses = {
-      dai: generateURI("ethereum", {
-        chainId: 1,
-        address: "0xf3e177a4034cf6e57ccbe80108cae6f3729c6649",
-      }),
-      usdc: generateURI("ethereum", {
-        chainId: 1,
-        address: "0xb6647e02ae6dd74137cb80b1c24333852e4af890",
-      }),
-      cusd: generateURI("ethereum", {
-        chainId: 42220,
-        address: "0x8922c8ac42ae84ced3a4e8d54ce7fcb3d52ebcb2",
-      }),
-      celo: generateURI("ethereum", {
-        chainId: 42220,
-        address: "0xf3ad97364bccc3ea0582ede58c363888f8c4ec85",
-      }),
-    };
-
-    // Sources should be sorted by amount
-    expect(leaderboard.sources.fiat[0][0]).toBe(sourceAddresses.cusd); // 15 cUSD
-    expect(leaderboard.sources.fiat[0][1]).toBe(15);
-    expect(leaderboard.sources.fiat[1][0]).toBe(sourceAddresses.dai); // 10 DAI
-    expect(leaderboard.sources.fiat[1][1]).toBe(10);
+    const second = leaderboard.find((item) => item.uri === uris.second);
+    expect(second).toBeDefined();
+    expect(second?.txVolume.inbound).toBe(18.325);
   });
 });

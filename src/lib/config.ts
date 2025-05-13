@@ -63,7 +63,7 @@ export const getTokensForWallet = (wallet: WalletConfig): Token[] => {
   }
   const tokenAddresses = getTokenAddressesFromSymbols(
     wallet.chain,
-    wallet.tokens
+    wallet.tokens.map((t) => t.symbol ?? "")
   );
   return tokenAddresses
     .map((address) => getTokenDetailsFromAddress(wallet.chain, address))

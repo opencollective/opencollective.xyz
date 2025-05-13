@@ -10,11 +10,8 @@ import type {
   EtherscanTransfer,
   Address,
   TxHash,
-} from "@/types/index.d.ts";
+} from "@/types";
 import * as crypto from "./crypto.server";
-import { nip19 } from "nostr-tools";
-import { bech32 } from "bech32";
-import { Buffer } from "buffer";
 export const truncateAddress = crypto.truncateAddress;
 
 const cache = {};

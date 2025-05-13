@@ -1,6 +1,6 @@
 "use client";
 
-import { GraphQLClient } from "graphql-request";
+import { GraphQLClient, gql } from "graphql-request";
 import AbortController from "abort-controller";
 import useSWR from "swr";
 import HumanNumber from "./HumanNumber";

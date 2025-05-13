@@ -1,4 +1,3 @@
-import config from "@/config.json";
 import MonthlySection from "@/components/MonthlySection";
 import {
   getTransactionsForCollective,
@@ -30,7 +29,13 @@ export default async function CollectivePage({
         <h2>All time activity since {oldestTxDate.toLocaleDateString()}</h2>
 
         <MonthlySection
-          label={"All times"}
+          filter={{
+            dateRange: {
+              start: new Date("2000-01-01"),
+              end: new Date(),
+              label: "All times",
+            },
+          }}
           tokens={tokens}
           transactions={transactions}
           live={false}

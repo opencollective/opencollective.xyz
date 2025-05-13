@@ -10,9 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import Link from "next/link";
-import { Address, ProfileData, URI } from "@/types";
+import { ProfileData, URI } from "@/types";
 import { generateURI, getAddressFromURI, getChainIdFromURI } from "@/lib/utils";
 import { useNostr } from "@/providers/NostrProvider";
 import { useState } from "react";
@@ -38,7 +38,7 @@ export default function NostrEditProfileModal({
   });
   const address = getAddressFromURI(uri);
 
-  const { publishMetadata, notesByURI, profiles } = useNostr();
+  const { publishMetadata, notesByURI } = useNostr();
   const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>(
     profile || {

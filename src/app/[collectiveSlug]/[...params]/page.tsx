@@ -112,7 +112,7 @@ export default async function CollectivePage({
               }
               return true;
             })
-            .map((currentMonth, i) => (
+            .map((currentMonth) => (
               <MonthlySection
                 key={currentMonth.label}
                 filter={{
