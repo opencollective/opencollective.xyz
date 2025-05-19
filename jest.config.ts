@@ -6,6 +6,7 @@ module.exports = {
     "@/config.json": "<rootDir>/config.json",
     "@/tokens.json": "<rootDir>/tokens.json",
     "@/relays.json": "<rootDir>/relays.json",
+    "@/test/(.*)": "<rootDir>/test/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
   },
 };

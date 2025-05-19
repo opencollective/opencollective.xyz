@@ -18,9 +18,10 @@ export default function LeaderboardComponent({
   transactions,
   direction,
   tokenType,
+  size,
   className,
 }: {
-  onClick: ({
+  onClick?: ({
     uri,
     direction,
     tokenType,
@@ -32,6 +33,7 @@ export default function LeaderboardComponent({
   transactions: Transaction[];
   direction: TransactionDirection;
   tokenType: TokenType;
+  size: "small" | "large";
   className?: string;
 }) {
   const addressURIs: URI[] = [];
@@ -64,40 +66,40 @@ export default function LeaderboardComponent({
 
   return (
     <div className={className}>
-      <div>
-        <div className="flex flex-wrap gap-1">
-          {leaderboard.map((entry: LeaderboardEntry) => {
-            const uri = entry.uri;
-            const address = getAddressFromURI(uri);
-            return (
-              <div key={uri} className="flex flex-col items-center text-center">
-                <Avatar
-                  uri={uri}
-                  title={`Address: ${truncateAddress(
-                    address
-                  )}\n\nTransactions: ${entry.txCount}${
-                    direction === "inbound"
-                      ? `\nInbound: ${entry.txVolume.inbound}`
-                      : ""
-                  }${
-                    direction === "outbound"
-                      ? `\nOutbound: ${entry.txVolume.outbound}`
-                      : ""
-                  }${
-                    direction === "internal"
-                      ? `\nInternal: ${entry.txVolume.internal}`
-                      : ""
-                  }${
-                    direction === "all" ? `\nAll: ${entry.txVolume.all}` : ""
-                  }`}
-                  editable={false}
-                  className="w-8 h-8"
-                  onClick={(uri: URI) => onClick({ uri, direction, tokenType })}
-                />
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex flex-wrap gap-1">
+        {leaderboard.map((entry: LeaderboardEntry) => {
+          const uri = entry.uri;
+          const address = getAddressFromURI(uri);
+          return (
+            <div key={uri} className="flex flex-col items-center text-center">
+              <Avatar
+                uri={uri}
+                title={`Address: ${truncateAddress(address)}\n\nTransactions: ${
+                  entry.stats.all.count
+                }${
+                  direction === "outbound"
+                    ? `\nInbound: ${entry.stats.inbound.value}` // for outbound transactions, we show the list of people who have received the tokens
+                    : ""
+                }${
+                  direction === "inbound"
+                    ? `\nOutbound: ${entry.stats.outbound.value}`
+                    : ""
+                }${
+                  direction === "internal"
+                    ? `\nInternal: ${entry.stats.internal.value}`
+                    : ""
+                }${
+                  direction === "all" ? `\nAll: ${entry.stats.all.value}` : ""
+                }`}
+                editable={false}
+                className={size === "large" ? "w-24 h-24" : "w-8 h-8"}
+                onClick={(uri: URI) =>
+                  onClick && onClick({ uri, direction, tokenType })
+                }
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

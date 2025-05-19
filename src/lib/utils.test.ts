@@ -8,6 +8,7 @@ import {
 import { Transaction, WalletConfig, Address, TxHash, Token } from "@/types";
 import { parseEther, parseUnits } from "ethers";
 import { describe, test, expect } from "@jest/globals";
+import mockedTransactions from "@/test/data/cht-transactions.json";
 
 describe("getTotalsByTokenType", () => {
   // Sample wallet configs from config.json
@@ -163,13 +164,7 @@ describe("getTotalsByTokenType", () => {
     };
 
     const result = getTotalsByTokenType([unknownTransaction], wallets);
-    expect(result).toEqual({
-      fiat: {
-        inbound: 0,
-        outbound: 0,
-        internal: 0,
-      },
-    });
+    expect(result).toEqual({});
   });
 });
 
@@ -217,7 +212,11 @@ describe("computeTokenStats", () => {
     expect(stats[tokenKey]).toBeDefined();
     expect(stats[tokenKey]).toEqual({
       token: testToken,
-      txCount: 2,
+      all: {
+        count: 2,
+        value: 260,
+        net: 70,
+      },
       internal: {
         count: 0,
         value: 0,
@@ -230,8 +229,6 @@ describe("computeTokenStats", () => {
         count: 1,
         value: 30,
       },
-      netValue: 70, // 100 inbound - 30 outbound
-      totalVolume: 130, // 100 + 30
     });
   });
 
@@ -353,7 +350,11 @@ describe("computeTokenStats", () => {
     expect(stats[tokenKey]).toBeDefined();
     expect(stats[tokenKey]).toEqual({
       token: testToken,
-      txCount: 5,
+      all: {
+        count: 5,
+        value: 400,
+        net: 50,
+      },
       internal: {
         count: 0,
         value: 0,
@@ -366,9 +367,20 @@ describe("computeTokenStats", () => {
         count: 3,
         value: 75, // 20 + 30 + 25
       },
-      netValue: 50, // 125 inbound - 75 outbound
-      totalVolume: 200, // 125 + 75
     });
+  });
+});
+
+describe("getLeaderboard with mocked transactions", () => {
+  const transactions = mockedTransactions as Transaction[];
+
+  test("should return the correct leaderboard", () => {
+    const leaderboard = getLeaderboard(transactions, "USD");
+    expect(leaderboard.length).toBe(25);
+    console.log(leaderboard[0].stats);
+    expect(leaderboard[0].stats.all.count).toBe(79);
+    expect(leaderboard[0].stats.all.value).toBe(198);
+    expect(leaderboard[0].transactions.length).toBe(79);
   });
 });
 
@@ -470,10 +482,10 @@ describe("getLeaderboard", () => {
 
     const first = leaderboard.find((item) => item.uri === uris.first);
     expect(first).toBeDefined();
-    expect(first?.txVolume.inbound).toBe(15);
+    expect(first?.stats.inbound.value).toBe(15);
 
     const second = leaderboard.find((item) => item.uri === uris.second);
     expect(second).toBeDefined();
-    expect(second?.txVolume.inbound).toBe(18.325);
+    expect(second?.stats.inbound.value).toBe(18.325);
   });
 });

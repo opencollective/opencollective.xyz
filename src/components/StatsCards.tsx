@@ -24,8 +24,8 @@ export default function StatsCards({
       {Object.entries(stats)
         .filter(
           ([, stats]) =>
-            stats.txCount > 0 &&
-            (stats.inbound.value > 0 || stats.outbound.value > 0)
+            stats.stats.all.count > 0 &&
+            (stats.stats.inbound.value > 0 || stats.stats.outbound.value > 0)
         )
         .map(([tokenAddress, stats]) => (
           <CryptoCardCompact
@@ -33,9 +33,9 @@ export default function StatsCards({
             name={stats.token.chain}
             key={`${stats.token.chain}:${tokenAddress}`}
             symbol={stats.token.symbol}
-            netAmount={stats.netValue}
-            inbound={stats.inbound.value}
-            outbound={stats.outbound.value}
+            netAmount={stats.stats.all.net ?? 0}
+            inbound={stats.stats.inbound.value}
+            outbound={stats.stats.outbound.value}
             iconUrl={stats.token.imageUrl}
           />
         ))}

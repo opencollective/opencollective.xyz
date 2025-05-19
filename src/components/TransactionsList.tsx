@@ -140,7 +140,8 @@ export default function Transactions({
       return Object.values(tokenStats)
         .filter(
           (tokenStats) =>
-            tokenStats.outbound.count > 0 || tokenStats.inbound.count > 1
+            tokenStats.stats.outbound.count > 0 ||
+            tokenStats.stats.inbound.count > 1
         )
         .map((tokenStats) => tokenStats.token);
     } catch (error) {

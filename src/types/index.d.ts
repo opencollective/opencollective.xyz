@@ -42,24 +42,20 @@ export type Token = {
   imageUrl?: string;
 };
 
+export type TxStats = Record<
+  TransactionDirection,
+  {
+    count: number;
+    value: number;
+    net?: number;
+  }
+>;
+
 export type TokenStats = {
   token: Token;
-  txCount: number;
-  inbound: {
-    count: number;
-    value: number;
-  };
-  outbound: {
-    count: number;
-    value: number;
-  };
-  internal: {
-    count: number;
-    value: number;
-  };
-  totalVolume?: number;
-  netValue: number;
+  stats: TxStats;
 };
+
 export interface Transaction {
   blockNumber: number;
   chainId: number;

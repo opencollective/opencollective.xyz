@@ -10,6 +10,7 @@ import {
   TokenStats,
   Transaction,
   TransactionDirection,
+  TxStats,
   URI,
   WalletConfig,
 } from "@/types";
@@ -211,8 +212,7 @@ type TokenType = "token" | "fiat";
 
 export type LeaderboardEntry = {
   uri: URI;
-  txCount: number;
-  txVolume: Record<TransactionDirection, number>;
+  stats: TxStats;
   transactions: Transaction[];
 };
 export type Leaderboard = LeaderboardEntry[];
@@ -281,12 +281,6 @@ export function getLeaderboard(
   direction?: TransactionDirection,
   tokenType?: TokenType
 ): Leaderboard {
-  console.log(
-    ">>> getLeaderboard",
-    `transactions.length: ${transactions.length}`,
-    direction,
-    tokenType
-  );
   const result: Leaderboard = [];
   const entriesByUri = new Map<string, LeaderboardEntry>();
 
@@ -294,6 +288,10 @@ export function getLeaderboard(
     tx: Transaction,
     direction: TransactionDirection
   ) => {
+    if (tx.value === "0") {
+      return;
+    }
+
     const uri = generateURI("ethereum", {
       chainId: tx.chainId,
       address: direction === "inbound" ? tx.to : tx.from,
@@ -309,27 +307,42 @@ export function getLeaderboard(
     if (!entriesByUri.has(uri)) {
       entriesByUri.set(uri, {
         uri,
-        txCount: 0,
-        txVolume: {
-          inbound: 0,
-          outbound: 0,
-          internal: 0,
-          all: 0,
+        stats: {
+          inbound: {
+            count: 0,
+            value: 0,
+          },
+          outbound: {
+            count: 0,
+            value: 0,
+          },
+          internal: {
+            count: 0,
+            value: 0,
+          },
+          all: {
+            count: 0,
+            value: 0,
+            net: 0,
+          },
         },
         transactions: [],
       });
     }
 
     const entry = entriesByUri.get(uri)!;
-    entry.txCount += 1;
-    entry.txVolume[direction] += amount;
-    entry.txVolume["all"] += amount;
+    entry.stats.all.count += 1;
+    entry.stats[direction].count += 1;
+    entry.stats[direction].value += amount;
+    entry.stats["all"].value += amount;
     entry.transactions.push(tx);
   };
 
   transactions.forEach((tx) => {
-    if (direction) {
-      processTransaction(tx, direction);
+    if (direction === "outbound") {
+      processTransaction(tx, "inbound");
+    } else if (direction === "inbound") {
+      processTransaction(tx, "outbound");
     } else {
       processTransaction(tx, "inbound");
       processTransaction(tx, "outbound");
@@ -341,12 +354,20 @@ export function getLeaderboard(
   });
 
   // Convert map to array and sort by txVolume descending
-  return result.sort(
+  const res = result.sort(
     (a, b) =>
-      b.txVolume.inbound +
-      b.txVolume.outbound -
-      (a.txVolume.inbound + a.txVolume.outbound)
+      b.stats.inbound.value +
+      b.stats.outbound.value -
+      (a.stats.inbound.value + a.stats.outbound.value)
   );
+  console.log(
+    ">>> getLeaderboard",
+    `transactions.length: ${transactions.length}`,
+    direction,
+    tokenType,
+    res
+  );
+  return res;
 }
 
 export const generateAvatar = (address: string) => {
@@ -402,13 +423,9 @@ export function filterTransactions(
   transactions: Transaction[],
   tokenType: TokenType,
   direction: TransactionDirection,
-  wallets: WalletConfig[] | undefined
+  walletAddresses: Address[] | undefined
 ) {
-  if (!wallets) return transactions;
-  if (wallets.length === 0) return transactions;
-  const walletAddresses = wallets
-    .filter((w) => !!w.address)
-    .map((w) => w.address.toLowerCase());
+  if (!walletAddresses || walletAddresses.length === 0) return transactions;
 
   const txs = transactions.filter((tx) => {
     if (!tx.token.symbol) return false;
@@ -416,20 +433,20 @@ export function filterTransactions(
 
     if (direction === "inbound") {
       return (
-        walletAddresses.includes(tx.to.toLowerCase()) &&
-        !walletAddresses.includes(tx.from.toLowerCase())
+        walletAddresses.includes(tx.to.toLowerCase() as Address) &&
+        !walletAddresses.includes(tx.from.toLowerCase() as Address)
       );
     }
     if (direction === "outbound") {
       return (
-        walletAddresses.includes(tx.from.toLowerCase()) &&
-        !walletAddresses.includes(tx.to.toLowerCase())
+        walletAddresses.includes(tx.from.toLowerCase() as Address) &&
+        !walletAddresses.includes(tx.to.toLowerCase() as Address)
       );
     }
     if (direction === "internal") {
       return (
-        walletAddresses.includes(tx.to.toLowerCase()) ||
-        walletAddresses.includes(tx.from.toLowerCase())
+        walletAddresses.includes(tx.to.toLowerCase() as Address) ||
+        walletAddresses.includes(tx.from.toLowerCase() as Address)
       );
     }
     return false;
@@ -521,21 +538,25 @@ export function computeTokenStats(
     if (!acc[tokenKey]) {
       acc[tokenKey] = {
         token,
-        txCount: 0,
-        inbound: {
-          count: 0,
-          value: 0,
+        stats: {
+          inbound: {
+            count: 0,
+            value: 0,
+          },
+          outbound: {
+            count: 0,
+            value: 0,
+          },
+          internal: {
+            count: 0,
+            value: 0,
+          },
+          all: {
+            count: 0,
+            value: 0,
+            net: 0,
+          },
         },
-        outbound: {
-          count: 0,
-          value: 0,
-        },
-        internal: {
-          count: 0,
-          value: 0,
-        },
-        netValue: 0,
-        totalVolume: 0,
       };
     }
     const amount = Number(
@@ -550,17 +571,18 @@ export function computeTokenStats(
     if (!direction || direction === "all") {
       return acc;
     }
-    acc[tokenKey][direction].count += 1;
-    acc[tokenKey][direction].value += amount;
+    acc[tokenKey].stats[direction].count += 1;
+    acc[tokenKey].stats[direction].value += amount;
+    acc[tokenKey].stats.all.value += amount;
     if (direction === "inbound") {
-      acc[tokenKey].netValue += amount;
+      acc[tokenKey].stats.all.net! += amount;
     } else if (direction === "outbound") {
-      acc[tokenKey].netValue -= amount;
+      acc[tokenKey].stats.all.net! -= amount;
     }
 
-    acc[tokenKey].txCount += 1;
-    if (acc[tokenKey].totalVolume !== undefined) {
-      acc[tokenKey].totalVolume += amount;
+    acc[tokenKey].stats.all.count += 1;
+    if (acc[tokenKey].stats.all.value !== undefined) {
+      acc[tokenKey].stats.all.value += amount;
     }
     return acc;
   }, {} as Record<string, TokenStats>);

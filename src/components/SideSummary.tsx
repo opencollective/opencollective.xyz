@@ -1,3 +1,5 @@
+"use client";
+
 import {
   filterTransactions,
   formatNumber,
@@ -12,6 +14,7 @@ import {
 } from "@/types";
 import { useMemo } from "react";
 import Leaderboard from "./Leaderboard";
+import { getWalletAddresses } from "@/lib/config";
 
 const getShortSymbol = (symbol: string) => {
   if (symbol === "USD") {
@@ -33,7 +36,7 @@ export default function SideSummary({
 }: {
   transactions: Transaction[];
   collectiveConfig: CollectiveConfig;
-  onClick: ({
+  onClick?: ({
     uri,
     direction,
     tokenType,
@@ -52,6 +55,8 @@ export default function SideSummary({
     return null;
   }
 
+  const walletAddresses = getWalletAddresses(collectiveConfig.slug);
+
   return (
     <div className="space-y-4">
       {/* Money In */}
@@ -67,11 +72,12 @@ export default function SideSummary({
             <Leaderboard
               tokenType="fiat"
               direction="inbound"
+              size="small"
               transactions={filterTransactions(
                 transactions,
                 "fiat",
                 "inbound",
-                collectiveConfig.wallets
+                walletAddresses
               )}
               onClick={onClick}
               className="mt-2"
@@ -93,11 +99,12 @@ export default function SideSummary({
             <Leaderboard
               tokenType="fiat"
               direction="outbound"
+              size="small"
               transactions={filterTransactions(
                 transactions,
                 "fiat",
                 "outbound",
-                collectiveConfig.wallets
+                walletAddresses
               )}
               onClick={onClick}
               className="mt-2"
@@ -117,12 +124,13 @@ export default function SideSummary({
             </p>
             <Leaderboard
               tokenType="token"
-              direction="outbound"
+              direction="outbound" /* issued tokens */
+              size="small"
               transactions={filterTransactions(
                 transactions,
                 "token",
                 "outbound",
-                collectiveConfig.wallets
+                walletAddresses
               )}
               onClick={onClick}
               className="mt-2"
@@ -144,12 +152,13 @@ export default function SideSummary({
             </p>
             <Leaderboard
               tokenType="token"
-              direction="inbound"
+              direction="inbound" /* redeemed tokens */
+              size="small"
               transactions={filterTransactions(
                 transactions,
                 "token",
                 "inbound",
-                collectiveConfig.wallets
+                walletAddresses
               )}
               onClick={onClick}
               className="mt-2"
