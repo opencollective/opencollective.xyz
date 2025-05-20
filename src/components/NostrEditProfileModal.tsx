@@ -16,7 +16,7 @@ import { ProfileData, URI } from "@/types";
 import { generateURI, getAddressFromURI, getChainIdFromURI } from "@/lib/utils";
 import { useNostr } from "@/providers/NostrProvider";
 import { useState } from "react";
-import chains from "@/chains.json";
+import chains from "@/data/chains.json";
 
 export default function NostrEditProfileModal({
   uri,

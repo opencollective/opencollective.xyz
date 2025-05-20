@@ -1,5 +1,5 @@
 import config from "@/config.json";
-import tokens from "@/tokens.json";
+import tokens from "@/data/tokens.json";
 import { Address, CollectiveConfig, Token, WalletConfig } from "@/types";
 
 // Add type for tokens structure
@@ -63,7 +63,7 @@ export const getTokensForWallet = (wallet: WalletConfig): Token[] => {
   }
   const tokenAddresses = getTokenAddressesFromSymbols(
     wallet.chain,
-    wallet.tokens.map((t) => t.symbol ?? "")
+    wallet.tokens
   );
   return tokenAddresses
     .map((address) => getTokenDetailsFromAddress(wallet.chain, address))

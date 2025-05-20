@@ -1,6 +1,41 @@
 {
   "collectives": [
     {
+      "slug": "genukraine",
+      "profile": {
+        "name": "GEN Ukraine",
+        "picture": "https://pbs.twimg.com/profile_images/1815354211183345664/6xzyN7Gy_400x400.jpg",
+        "about": "GEN Ukraine: Global Ecovillage Network Ukgraine",
+        "website": "https://genukraine.com.ua"
+      },
+      "primaryCurrency": "USD",
+      "wallets": [
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0x5157D8fF3FCfacAC630A1cB5bC9902dCC8433260",
+          "tokens": [
+            "ETH",
+            "WETH",
+            "GLM",
+            "GTC",
+            "DAI",
+            "USDC"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "celo",
+          "address": "0x1DfC4C1acBc8aBa992dC85dd1282b64708081829",
+          "tokens": [
+            "CELO",
+            "CUSD",
+            "USDGLO"
+          ]
+        }
+      ]
+    },
+    {
       "slug": "vdao",
       "profile": {
         "name": "VDAO",
@@ -86,6 +121,10 @@
           "decimals": 6,
           "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
         }
+      ],
+      "ignoreTxs": [
+        "0x42262de0f79d40de757f8fd08afb1927d693b7f033ff6fc828c1d30d19dfefa3",
+        "0x1a93cfa2f712079e9ee4657ab22eb6f170dfbbd1d559991e759d364690008ffb"
       ],
       "wallets": [
         {

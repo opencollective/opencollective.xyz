@@ -1,6 +1,6 @@
 import type { Address } from "@/types/index.d.ts";
 import { ethers, JsonRpcProvider } from "ethers";
-import chains from "@/chains.json";
+import chains from "@/data/chains.json";
 
 export function truncateAddress(address: Address) {
   if (!address) return "";

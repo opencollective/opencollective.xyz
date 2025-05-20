@@ -17,8 +17,14 @@ import {
 import { NostrNote } from "@/providers/NostrProvider";
 import { npubEncode } from "nostr-tools/nip19";
 import { ethers } from "ethers";
-import chains from "@/chains.json";
-import tokens from "@/tokens.json";
+import chains from "@/data/chains.json";
+import tokens from "@/data/tokens.json";
+
+import ethUsdFxrate from "@/data/fxrate/eth.usd.fxrate.json";
+import gtcUsdFxrate from "@/data/fxrate/gtc.usd.fxrate.json";
+import glmUsdFxrate from "@/data/fxrate/glm.usd.fxrate.json";
+import arbUsdFxrate from "@/data/fxrate/arb.usd.fxrate.json";
+import celoUsdFxrate from "@/data/fxrate/celo.usd.fxrate.json";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -217,13 +223,27 @@ export type LeaderboardEntry = {
 };
 export type Leaderboard = LeaderboardEntry[];
 
-const getFxRate = (fromToken: Token, toToken: Token, date: Date) => {
-  console.log(
-    "getFxRate",
-    `${fromToken.chain}:${fromToken.symbol}`,
-    `${toToken.chain}:${toToken.symbol}`,
-    date.toISOString().split("T")[0]
-  );
+export const getFxRate = (
+  fromToken: Token,
+  toCurrency: FiatCurrencySymbol,
+  date: Date
+) => {
+  const ts = date.toISOString().split("T")[0].replace(/-/g, "");
+  if (fromToken.symbol === "ETH" && toCurrency === "USD") {
+    return ethUsdFxrate[ts as keyof typeof ethUsdFxrate];
+  }
+  if (fromToken.symbol === "GTC" && toCurrency === "USD") {
+    return gtcUsdFxrate[ts as keyof typeof gtcUsdFxrate];
+  }
+  if (fromToken.symbol === "GLM" && toCurrency === "USD") {
+    return glmUsdFxrate[ts as keyof typeof glmUsdFxrate];
+  }
+  if (fromToken.symbol === "ARB" && toCurrency === "USD") {
+    return arbUsdFxrate[ts as keyof typeof arbUsdFxrate];
+  }
+  if (fromToken.symbol === "CELO" && toCurrency === "USD") {
+    return celoUsdFxrate[ts as keyof typeof celoUsdFxrate];
+  }
   return 1;
 };
 
@@ -258,15 +278,18 @@ export const getPrimaryToken = (
 
 const normalizeAmount = (
   fromToken: Token | null,
-  toToken: Token | null,
+  toCurrency: FiatCurrencySymbol,
   amount: number,
   date: Date
 ) => {
-  if (!fromToken || !toToken) return 0;
-  if (fromToken.symbol === toToken.symbol) {
+  if (!fromToken || !toCurrency) return 0;
+  if (
+    fromToken.symbol?.startsWith(toCurrency) ||
+    fromToken.symbol?.endsWith(toCurrency)
+  ) {
     return amount;
   }
-  const fxRate = getFxRate(fromToken, toToken, date);
+  const fxRate = getFxRate(fromToken, toCurrency, date);
   return amount * fxRate;
 };
 
@@ -278,8 +301,7 @@ const getTokenType = (tokenSymbol: string): TokenType => {
 export function getLeaderboard(
   transactions: Transaction[],
   primaryCurrency: FiatCurrencySymbol,
-  direction?: TransactionDirection,
-  tokenType?: TokenType
+  direction?: TransactionDirection
 ): Leaderboard {
   const result: Leaderboard = [];
   const entriesByUri = new Map<string, LeaderboardEntry>();
@@ -299,7 +321,7 @@ export function getLeaderboard(
 
     const amount = normalizeAmount(
       tx.token,
-      getPrimaryToken(tx.chainId, primaryCurrency),
+      primaryCurrency,
       Number(ethers.formatUnits(tx.value, tx.token.decimals)),
       new Date(tx.timestamp * 1000)
     );
@@ -360,13 +382,7 @@ export function getLeaderboard(
       b.stats.outbound.value -
       (a.stats.inbound.value + a.stats.outbound.value)
   );
-  console.log(
-    ">>> getLeaderboard",
-    `transactions.length: ${transactions.length}`,
-    direction,
-    tokenType,
-    res
-  );
+
   return res;
 }
 
@@ -462,7 +478,8 @@ export function filterTransactions(
  */
 export function getTotalsByTokenType(
   transactions: Transaction[],
-  wallets: WalletConfig[]
+  wallets: WalletConfig[],
+  primaryCurrency: FiatCurrencySymbol
 ): Record<
   string,
   { inbound: number; outbound: number; internal: number }
@@ -483,8 +500,11 @@ export function getTotalsByTokenType(
         internal: 0,
       };
     }
-    const amount = Number(
-      ethers.formatUnits(tx.value, tx.token.decimals || 18)
+    const amount = normalizeAmount(
+      tx.token,
+      primaryCurrency || "USD",
+      Number(ethers.formatUnits(tx.value, tx.token.decimals || 18)),
+      new Date(tx.timestamp * 1000)
     );
     acc[tokenType][transactionDirection] += amount;
     return acc;

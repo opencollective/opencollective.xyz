@@ -5,7 +5,12 @@ import { Edit } from "lucide-react";
 import Avatar from "@/components/Avatar";
 import { Separator } from "@/components/ui/separator";
 import { useNostr } from "@/providers/NostrProvider";
-import type { Transaction, Address, ProfileData } from "@/types";
+import type {
+  Transaction,
+  Address,
+  ProfileData,
+  FiatCurrencySymbol,
+} from "@/types";
 import EditMetadataForm from "@/components/EditMetadataForm";
 import TagsList from "./TagsList";
 
@@ -15,6 +20,7 @@ import {
   formatTimestamp,
   generateURI,
   getChainSlugFromChainId,
+  getFxRate,
 } from "@/lib/utils";
 interface TransactionRowProps {
   tx: Transaction;
@@ -82,6 +88,12 @@ export function TransactionRow({ tx, collectiveSlug }: TransactionRowProps) {
 
   const defaultFromProfile = getDefaultProfile(tx.from);
   const defaultToProfile = getDefaultProfile(tx.to);
+
+  const fxrate = getFxRate(
+    tx.token,
+    collectiveConfig?.primaryCurrency as FiatCurrencySymbol,
+    new Date(tx.timestamp * 1000)
+  );
 
   return (
     <div className="space-y-4" key={tx.txHash}>
@@ -182,11 +194,28 @@ export function TransactionRow({ tx, collectiveSlug }: TransactionRowProps) {
                 Number(ethers.formatUnits(tx.value, tx.token.decimals))
               )}{" "}
             </span>
+
             <Link href={`/${chain}/token/${tx.token.address}`}>
               <span className="text-sm font-normal text-muted-foreground">
                 {tx.token.symbol?.substring(0, 6)}
               </span>
             </Link>
+
+            {/* Add USD equivalent for non-USD tokens */}
+            {fxrate !== 1 && (
+              <div
+                className="text-sm text-muted-foreground"
+                title={`1 ${tx.token.symbol} ≈ ${fxrate.toFixed(
+                  4
+                )} on ${formatTimestamp(tx.timestamp, "MMM d, yyyy")}`}
+              >
+                ≈ $
+                {formatNumber(
+                  Number(ethers.formatUnits(tx.value, tx.token.decimals)) *
+                    fxrate
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { JsonRpcProvider, WebSocketProvider, Log, ethers } from "ethers";
-import chains from "@/chains.json";
+import chains from "@/data/chains.json";
 import { Address, ChainConfig, Transaction } from "@/types";
 import { getTxFromLog } from "@/utils/crypto";
 

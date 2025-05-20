@@ -8,7 +8,7 @@ import {
   WalletConfig,
 } from "@/types";
 import { getTokenDetailsFromAddress } from "./config";
-import chains from "@/chains.json";
+import chains from "@/data/chains.json";
 import { getTransactions } from "./crypto";
 
 export const getTransactionsForCollective = async (
@@ -21,18 +21,16 @@ export const getTransactionsForCollective = async (
     throw new Error(`Collective ${collectiveSlug} not found`);
   }
 
-  const transactions: Transaction[] = [];
+  console.log(">>> getTransactionsForCollective", collectiveConfig);
 
-  const ignoreTxs = [
-    "0x42262de0f79d40de757f8fd08afb1927d693b7f033ff6fc828c1d30d19dfefa3",
-    "0x1a93cfa2f712079e9ee4657ab22eb6f170dfbbd1d559991e759d364690008ffb",
-  ];
+  const transactions: Transaction[] = [];
+  const ignoreTxs = collectiveConfig.ignoreTxs || [];
   const addTransactions = (
     chain: string,
     txs: EtherscanTransfer[],
     token?: Token
   ) => {
-    if (txs.length === 0) {
+    if (!Array.isArray(txs) || txs.length === 0) {
       return;
     }
     if (year) {
@@ -70,6 +68,7 @@ export const getTransactionsForCollective = async (
   };
 
   const tokens = [];
+  console.log(">>> collectiveConfig.tokens", collectiveConfig.tokens);
   await Promise.all(
     collectiveConfig.tokens?.map(async (token) => {
       const txs = await getTransactions(token.chain, token.address as Address);
@@ -87,16 +86,22 @@ export const getTransactionsForCollective = async (
         if (!wallet.chain) {
           throw new Error(`No chain defined for wallet ${wallet.address}`);
         }
+
+        if (wallet.address === "0x0000000000000000000000000000000000000000") {
+          return;
+        }
+
         const tokenAddresses = getTokenAddressesFromSymbols(
           wallet.chain,
-          wallet.tokens.map((t) => t.symbol ?? "")
+          wallet.tokens
         );
+
         const txs = await getTransactions(
           wallet.chain,
           null,
           wallet.address.split("/")[0]
         );
-        if (txs?.length > 0) {
+        if (Array.isArray(txs) && txs?.length > 0) {
           addTransactions(
             wallet.chain,
             txs.filter((tx) =>
@@ -114,7 +119,7 @@ export const getTransactionsForCollective = async (
           wallet.address.split("/")[0],
           "native"
         );
-        if (txsNative.length > 0) {
+        if (Array.isArray(txsNative) && txsNative?.length > 0) {
           addTransactions(
             wallet.chain,
             txsNative,

@@ -113,7 +113,7 @@ export type WalletConfig = {
   type: "blockchain" | "opencollective";
   chain: string;
   address: string;
-  tokens: Token[]; // token symbols
+  tokens: string[]; // token symbols
   hostSlug?: string;
   collectiveSlug?: string;
   currency?: string;
@@ -125,6 +125,7 @@ export type CollectiveConfig = {
   wallets: WalletConfig[];
   primaryCurrency: string;
   profile: ProfileData;
+  ignoreTxs?: string[];
 };
 
 export type ProfileData = {

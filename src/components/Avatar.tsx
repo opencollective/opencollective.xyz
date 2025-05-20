@@ -105,19 +105,13 @@ export default function Avatar({
     const fetchENSDetails = async (address: Address) => {
       const cache = localStorage.getItem(`ens-${address}`);
       if (cache) {
-        console.log(">>> fetchENSDetails cache", cache);
         const cacheData = JSON.parse(cache);
         if (cacheData.timestamp > Date.now() - 1000 * 60 * 60 * 24) {
           updateProfileFromENSDetails(address, cacheData.profile);
-          console.log(">>> fetchENSDetails cache hit", cacheData.profile);
           return;
         } else {
           localStorage.removeItem(`ens-${address}`);
           updateProfileFromENSDetails(address, cacheData.profile);
-          console.log(
-            ">>> fetchENSDetails cache grace period",
-            cacheData.profile
-          );
           return;
         }
       }
@@ -134,20 +128,40 @@ export default function Avatar({
       }
     };
 
-    if (!profile.name) {
-      const profile = getProfileFromNotes(uri, notesByURI[uri]);
-      if (profile.name) {
-        setProfile(profile);
-      } else {
-        const address = getAddressFromURI(uri);
-        fetchENSDetails(address);
-      }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (!profile.name) {
+            const profile = getProfileFromNotes(uri, notesByURI[uri]);
+            if (profile.name) {
+              setProfile(profile);
+            } else {
+              const address = getAddressFromURI(uri);
+              fetchENSDetails(address);
+            }
+          }
+          // Once we've loaded the data, we can disconnect the observer
+          observer.disconnect();
+        }
+      });
+    });
+
+    // Get the avatar element and observe it
+    const avatarElement = document.querySelector(`[data-uri="${uri}"]`);
+    if (avatarElement) {
+      observer.observe(avatarElement);
     }
+
+    // Cleanup function
+    return () => {
+      observer.disconnect();
+    };
   }, [notesByURI, uri, profile.name]);
 
   return (
     <AvatarUI
       title={title || profile?.name || profile?.address}
+      data-uri={uri}
       className={cn(
         "h-12 w-12 border-2 border-gray-300 uppercase text-gray-500",
         className,

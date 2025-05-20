@@ -121,7 +121,7 @@ export default function MonthlySection({
             />
           </div>
         </div>
-        <div className="col-span-8">
+        <div className="col-span-8 h-full">
           {filter.address && (
             <>
               <AddressInfo
@@ -144,7 +144,9 @@ export default function MonthlySection({
               />
             </>
           ) : (
-            <div>(No transaction)</div>
+            <div className="text-gray-500 h-full flex items-center justify-center">
+              (No transaction)
+            </div>
           )}
         </div>
       </div>

@@ -11,6 +11,7 @@ import {
   URI,
   TransactionDirection,
   TokenType,
+  FiatCurrencySymbol,
 } from "@/types";
 import { useMemo } from "react";
 import Leaderboard from "./Leaderboard";
@@ -47,8 +48,13 @@ export default function SideSummary({
   }) => void;
 }) {
   const totals = useMemo(
-    () => getTotalsByTokenType(transactions, collectiveConfig.wallets),
-    [transactions, collectiveConfig.wallets]
+    () =>
+      getTotalsByTokenType(
+        transactions,
+        collectiveConfig.wallets,
+        collectiveConfig.primaryCurrency as FiatCurrencySymbol
+      ),
+    [transactions, collectiveConfig.wallets, collectiveConfig.primaryCurrency]
   );
   console.log(">>> totals", totals);
   if (!totals || (!totals["fiat"] && !totals["token"])) {

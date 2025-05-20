@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "convert-fxrate-files": "npx tsx src/utils/convert.fxrate.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.3",
@@ -29,6 +30,7 @@
     "next": "15.1.6",
     "next-themes": "^0.4.4",
     "nostr-tools": "^2.11.0",
+    "pako": "^2.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shadcn": "^2.4.0-canary.17",
@@ -36,19 +38,20 @@
     "swr": "^2.3.3",
     "tailwind-merge": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
-    "ts-jest": "^29.3.2",
-    "ts-node": "^10.9.2"
+    "ts-jest": "^29.3.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pako": "^2.0.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.6",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }
