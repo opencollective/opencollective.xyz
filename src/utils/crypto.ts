@@ -39,7 +39,7 @@ export async function getTokenDetails(
   chain: string,
   contractAddress: string,
   provider: JsonRpcProvider
-) {
+): Promise<Token | null> {
   try {
     const key = `${chain}:${contractAddress}`;
     const cached = cache.get<{
@@ -50,7 +50,7 @@ export async function getTokenDetails(
     }>(key);
 
     if (cached) {
-      return { ...cached, cached: true };
+      return cached as Token;
     }
 
     // Validate contract address
@@ -66,22 +66,24 @@ export async function getTokenDetails(
       contract.decimals(),
     ]);
 
-    const tokenDetails = {
-      name,
-      symbol,
+    const tokenDetails: Token = {
+      chain,
+      name: (name || "Unknown Token") as string,
+      symbol: (symbol || "???") as string,
       decimals: Number(decimals),
-      address: contractAddress,
+      address: contractAddress as Address,
     };
 
     cache.set(key, tokenDetails);
-    return tokenDetails;
+    return tokenDetails as Token;
   } catch (err) {
     console.error("Error fetching token details:", err);
     return {
+      chain,
       name: "Unknown Token",
       symbol: "???",
       decimals: 18,
-      address: contractAddress,
+      address: contractAddress as Address,
     };
   }
 }
@@ -96,9 +98,10 @@ type TxDetails = {
   chainId: number;
   hash: string;
   contract_address: string;
-  name: string;
+  function?: string | null;
+  name: string | null;
   args: string[];
-  token: Token;
+  token?: Token;
   events: LogEvent[];
 };
 
@@ -118,11 +121,13 @@ export function useTxDetails(chain: string, txHash?: string) {
       if (!txHash) return;
       try {
         const tx = await getTxDetails(txHash, provider.current);
+        if (!tx) return;
         const token = await getTokenDetails(
           chain,
           tx.contract_address,
           provider.current
         );
+        if (!token) return;
         setTxDetails({ ...tx, token });
         setIsLoading(false);
       } catch (err) {
@@ -198,7 +203,10 @@ export async function getAddressType(
   return res;
 }
 
-export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
+export async function getTxDetails(
+  tx_hash: string,
+  provider: JsonRpcProvider
+): Promise<TxDetails | null> {
   const tx = await provider.getTransaction(tx_hash);
   if (!tx?.to) return null;
 
@@ -216,7 +224,7 @@ export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
     let name = decoded?.name;
     let args = decoded?.args ? Array.from(decoded.args) : [];
     // Parse all logs from the receipt
-    const events = receipt?.logs
+    const events: LogEvent[] = receipt?.logs
       .map((log) => {
         try {
           // Create a new contract instance with the log's address
@@ -247,13 +255,14 @@ export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
           return null;
         }
       })
-      .filter((e) => Boolean(e?.name)); // Remove null entries
+      .filter((e) => Boolean(e?.name)) as LogEvent[]; // Remove null entries
 
-    const res = {
+    const res: TxDetails = {
       chainId: Number(tx.chainId),
       hash: tx.hash,
       contract_address, // This might be different from tx.to if it's a proxy
-      name,
+      name: name as string,
+      function: decoded?.name,
       args,
       events,
     };
@@ -264,8 +273,10 @@ export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
   } catch (error) {
     console.error("Error decoding transaction:", error);
     return {
+      chainId: Number(tx.chainId),
+      hash: tx.hash,
+      name: null,
       contract_address: tx.to,
-      from: tx.from,
       function: null,
       args: [],
       events: [],
@@ -298,13 +309,14 @@ export async function processBlockRange(
           provider
         );
         const token = await getTokenDetails(chain, tx.token.address, provider);
+        if (!token) return null;
         return {
           ...tx,
           timestamp,
           token,
         };
       })
-    );
+    ).then((txs) => txs.filter((tx): tx is Transaction => tx !== null));
     return newTxs;
   } else {
     return [];
@@ -433,7 +445,7 @@ export async function getTxFromLog(
     value,
     chainId,
   };
-  return tx;
+  return tx as Transaction;
 }
 
 /**
@@ -539,12 +551,7 @@ export async function getTransactionsFromEtherscan(
 }
 
 export function useTokenDetails(chain: string, contractAddress: string) {
-  const [token, setToken] = useState<{
-    name: string;
-    symbol: string;
-    decimals: number;
-    address: string;
-  } | null>(null);
+  const [token, setToken] = useState<Token | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -571,7 +578,7 @@ export function useTokenDetails(chain: string, contractAddress: string) {
           provider
         );
 
-        setToken(tokenDetails);
+        setToken(tokenDetails as Token);
       } catch (err) {
         console.error("Error in useTokenDetails:", err);
         setError(err instanceof Error ? err : new Error("Unknown error"));
