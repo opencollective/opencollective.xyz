@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.twimg.com",
       },
+      {
+        protocol: "https",
+        hostname: "euc.li",
+      },
     ],
   },
   async redirects() {

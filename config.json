@@ -1,6 +1,36 @@
 {
   "collectives": [
     {
+      "slug": "atlantisdao.eth",
+      "profile": {
+        "name": "Atlantis DAO",
+        "picture": "https://euc.li/atlantisdao.eth",
+        "about": "A co-op of creators, makers and doers, accelerating the adoption of regeneration, circularity and sustainability. ",
+        "website": "https://www.atlantisp2p.com/"
+      },
+      "primaryCurrency": "USD",
+      "wallets": [
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0xfbCA78474A09E2BF3543f4Fc1037152ea2c6C32d",
+          "tokens": [
+            "ETH",
+            "WETH",
+            "GLM",
+            "GTC",
+            "DAI",
+            "USDC",
+            "USDT",
+            "USDGLO",
+            "ARB",
+            "DAI",
+            "WETH"
+          ]
+        }
+      ]
+    },
+    {
       "slug": "genukraine",
       "profile": {
         "name": "GEN Ukraine",
