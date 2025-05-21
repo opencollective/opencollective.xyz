@@ -67,7 +67,7 @@ export default function SideSummary({
 
   return (
     <div className="space-y-8">
-      <div className="flex sm:flex-col">
+      <div className="flex sm:flex-col space-y-4">
         {/* Money In */}
         {totals.fiat && (
           <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full">
@@ -124,7 +124,7 @@ export default function SideSummary({
       </div>
 
       {/* Tokens Issued */}
-      <div className="flex sm:flex-col">
+      <div className="flex sm:flex-col space-y-4">
         {totals.token && (
           <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full">
             <Separator />

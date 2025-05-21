@@ -99,12 +99,12 @@ export default function MonthlySection({
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-10 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-6 items-start">
         <div className="sm:mb-8 col-span-1 md:col-span-2">
           <h2 className="text-xl font-semibold mb-4">
             {filter.dateRange?.label}
           </h2>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
             <SideSummary
               transactions={transactions}
               collectiveConfig={collectiveConfig}
