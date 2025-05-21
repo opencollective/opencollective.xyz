@@ -33,7 +33,11 @@ export default function CollectivePageContent({
   }, [collectiveConfig.slug]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-96">
+        Loading data...
+      </div>
+    );
   }
 
   // Get the oldest transaction timestamp

@@ -30,6 +30,8 @@ const getShortSymbol = (symbol: string) => {
   return symbol;
 };
 
+const Separator = () => <div className="w-[1px] shrink-0 bg-gray-700" />;
+
 export default function SideSummary({
   transactions,
   collectiveConfig,
@@ -68,10 +70,10 @@ export default function SideSummary({
       <div className="flex items-center justify-between">
         {/* Money In */}
         {totals.fiat && (
-          <div className="flex items-start">
-            <div className="w-0.5 h-20 bg-gray-700 mr-3"></div>
+          <div className="flex flex-row items-stretch gap-3">
+            <Separator />
             <div>
-              <h2 className="text-lg font-light mt-2 mb-2 ml-0">Money In</h2>
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money In</h2>
               <p className="text-xl font-light text-green-400">
                 + {getShortSymbol(collectiveConfig.primaryCurrency)}
                 {formatNumber(totals["fiat"].inbound)}
@@ -95,10 +97,10 @@ export default function SideSummary({
 
         {/* Money Out */}
         {totals.fiat && (
-          <div className="flex items-start">
-            <div className="w-0.5 h-20 bg-gray-700 mr-3"></div>
-            <div>
-              <h2 className="text-lg font-light mt-2 mb-2 ml-0">Money Out</h2>
+          <div className="flex flex-row items-stretch gap-3">
+            <Separator />
+            <div className="">
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money Out</h2>
               <p className="text-xl font-light text-pink-400">
                 - {getShortSymbol(collectiveConfig.primaryCurrency)}
                 {formatNumber(totals["fiat"].outbound)}
@@ -122,10 +124,10 @@ export default function SideSummary({
       </div>
       {/* Tokens Issued */}
       {totals.token && (
-        <div className="flex items-start">
-          <div className="w-0.5 h-20 bg-gray-700 mr-3"></div>
+        <div className="flex flex-row items-stretch gap-3">
+          <Separator />
           <div>
-            <h2 className="text-lg font-light mt-2 mb-2 ml-0">Tokens Issued</h2>
+            <h2 className="text-lg font-light mt-0 mb-2 ml-0">Tokens Issued</h2>
             <p className="text-xl font-light">
               {formatNumber(totals["token"].outbound)}
             </p>
@@ -148,10 +150,10 @@ export default function SideSummary({
 
       {/* Tokens Redeemed */}
       {totals.token && (
-        <div className="flex items-start">
-          <div className="w-0.5 h-20 bg-gray-700 mr-3"></div>
+        <div className="flex flex-row items-stretch gap-3">
+          <Separator />
           <div>
-            <h2 className="text-lg font-light mt-2 mb-2 ml-0">
+            <h2 className="text-lg font-light mt-0 mb-2 ml-0">
               Tokens Redeemed
             </h2>
             <p className="text-xl font-light">

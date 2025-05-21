@@ -102,7 +102,7 @@ export default function LeaderboardComponent({
                 }${
                   direction === "all" ? `\nAll: ${entry.stats.all.value}` : ""
                 }`}
-                editable={false}
+                editable={true}
                 className={
                   size === "large"
                     ? "w-24 h-24"
@@ -120,12 +120,8 @@ export default function LeaderboardComponent({
         {limit && leaderboard.length > limit && (
           <div className="flex flex-col items-center text-center">
             <div
-              className={`flex items-center justify-center bg-gray-100 rounded-full ${
-                size === "large"
-                  ? "w-24 h-24"
-                  : size === "medium"
-                  ? "w-16 h-16"
-                  : "w-8 h-8"
+              className={`flex ml-1 items-center justify-center ${
+                size === "large" ? "h-24" : size === "medium" ? "h-16" : "h-8"
               }`}
             >
               <span
@@ -135,7 +131,7 @@ export default function LeaderboardComponent({
                     : size === "medium"
                     ? "text-xl"
                     : "text-sm"
-                } font-medium text-gray-600`}
+                } font-medium dark:text-white`}
               >
                 +{leaderboard.length - limit}
               </span>
