@@ -67,10 +67,10 @@ export default function SideSummary({
 
   return (
     <div className="space-y-8">
-      <div className="flex sm:flex-col space-y-4">
+      <div className="flex sm:flex-col space-x-4 sm:space-x-0 sm:space-y-4 items-start">
         {/* Money In */}
         {totals.fiat && (
-          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full">
+          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full align-top">
             <Separator />
             <div>
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money In</h2>
@@ -97,7 +97,7 @@ export default function SideSummary({
 
         {/* Money Out */}
         {totals.fiat && (
-          <div className="flex flex-row items-stretch gap-2">
+          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full align-top">
             <Separator />
             <div>
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money Out</h2>
@@ -124,9 +124,9 @@ export default function SideSummary({
       </div>
 
       {/* Tokens Issued */}
-      <div className="flex sm:flex-col space-y-4">
+      <div className="flex sm:flex-col space-x-4 sm:space-x-0 sm:space-y-4 items-start">
         {totals.token && (
-          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full">
+          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full align-top">
             <Separator />
             <div>
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">
@@ -154,7 +154,7 @@ export default function SideSummary({
 
         {/* Tokens Redeemed */}
         {totals.token && (
-          <div className="flex flex-row items-stretch gap-2">
+          <div className="flex flex-row items-stretch gap-2 w-1/2 sm:w-full align-top">
             <Separator />
             <div>
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">
