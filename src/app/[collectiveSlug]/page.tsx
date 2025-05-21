@@ -1,5 +1,6 @@
 import { getCollectiveConfig } from "@/lib/config";
 import CollectivePageContent from "@/components/CollectivePageContent";
+import Image from "next/image";
 
 export default async function CollectivePage({
   params,
@@ -15,7 +16,18 @@ export default async function CollectivePage({
 
   return (
     <div className="max-w-screen-lg mx-auto p-4">
-      <h1>{collectiveConfig.profile.name}</h1>
+      <div className="flex flex-row gap-4 items-center mt-8">
+        {collectiveConfig.profile?.picture && (
+          <Image
+            src={collectiveConfig.profile.picture}
+            alt={collectiveConfig.profile.name || ""}
+            width={100}
+            height={100}
+            className="rounded-full"
+          />
+        )}
+        <h1 className="text-4xl font-bold">{collectiveConfig.profile.name}</h1>
+      </div>
       <CollectivePageContent collectiveConfig={collectiveConfig} />
     </div>
   );

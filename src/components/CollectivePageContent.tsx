@@ -7,6 +7,7 @@ import {
   getUniqueTokensFromTransactions,
 } from "@/lib/transactions";
 import type { CollectiveConfig, Transaction } from "@/types";
+import GlobalLeaderboard from "./GlobalLeaderboard";
 
 export default function CollectivePageContent({
   collectiveConfig,
@@ -70,24 +71,34 @@ export default function CollectivePageContent({
   const tokens = getUniqueTokensFromTransactions(transactions);
 
   return (
-    <div>
-      <h2>Community Activity by Month</h2>
-      {pastMonths.map((month, i) => (
-        <MonthlySection
-          key={month.label}
-          filter={{
-            dateRange: {
-              start: month.start,
-              end: month.end,
-              label: month.label,
-            },
-            selectedTokens: tokens,
-          }}
-          transactions={filterTransactions(month.start, month.end)}
-          live={i === 0}
+    <div className="flex flex-col gap-8">
+      <div className="mt-16">
+        <GlobalLeaderboard
+          transactions={transactions}
           collectiveConfig={collectiveConfig}
         />
-      ))}
+      </div>
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold">Transactions by month</h2>
+        <div className="flex flex-col gap-16">
+          {pastMonths.map((month, i) => (
+            <MonthlySection
+              key={month.label}
+              filter={{
+                dateRange: {
+                  start: month.start,
+                  end: month.end,
+                  label: month.label,
+                },
+                selectedTokens: tokens,
+              }}
+              transactions={filterTransactions(month.start, month.end)}
+              live={i === 0}
+              collectiveConfig={collectiveConfig}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -123,7 +123,7 @@ export type CollectiveConfig = {
   slug: string;
   tokens?: Token[];
   wallets: WalletConfig[];
-  primaryCurrency: string;
+  primaryCurrency: FiatCurrencySymbol;
   profile: ProfileData;
   ignoreTxs?: string[];
 };

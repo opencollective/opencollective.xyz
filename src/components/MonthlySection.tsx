@@ -133,8 +133,7 @@ export default function MonthlySection({
             </>
           )}
           {transactions.length > 0 ? (
-            <>
-              <h2>Transactions</h2>
+            <div className="mt-8">
               <TransactionsList
                 transactions={transactions}
                 accountAddresses={wallets.map((w) => w.address) as Address[]}
@@ -142,7 +141,7 @@ export default function MonthlySection({
                 collectiveSlug={collectiveConfig.slug}
                 limit={limit || 5}
               />
-            </>
+            </div>
           ) : (
             <div className="text-gray-500 h-full flex items-center justify-center">
               (No transaction)

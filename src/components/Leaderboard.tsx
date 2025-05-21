@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  cn,
   generateURI,
   getAddressFromURI,
   getLeaderboard,
@@ -34,7 +35,7 @@ export default function LeaderboardComponent({
   transactions: Transaction[];
   direction: TransactionDirection;
   tokenType: TokenType;
-  size: "small" | "large";
+  size: "small" | "medium" | "large";
   limit?: number;
   className?: string;
 }) {
@@ -70,12 +71,18 @@ export default function LeaderboardComponent({
 
   return (
     <div className={className}>
-      <div className="flex flex-wrap gap-1">
+      <div
+        className={cn(
+          "flex flex-wrap gap-1",
+          size === "large" && "gap-4",
+          size === "medium" && "gap-2"
+        )}
+      >
         {leaderboardEntries.map((entry: LeaderboardEntry) => {
           const uri = entry.uri;
           const address = getAddressFromURI(uri);
           return (
-            <div key={uri} className="flex flex-col items-center text-center">
+            <div key={uri} className="flex flex-col items-center text-center ">
               <Avatar
                 uri={uri}
                 title={`Address: ${truncateAddress(address)}\n\nTransactions: ${
@@ -96,7 +103,13 @@ export default function LeaderboardComponent({
                   direction === "all" ? `\nAll: ${entry.stats.all.value}` : ""
                 }`}
                 editable={false}
-                className={size === "large" ? "w-24 h-24" : "w-8 h-8"}
+                className={
+                  size === "large"
+                    ? "w-24 h-24"
+                    : size === "medium"
+                    ? "w-16 h-16"
+                    : "w-8 h-8"
+                }
                 onClick={(uri: URI) =>
                   onClick && onClick({ uri, direction, tokenType })
                 }
@@ -108,12 +121,20 @@ export default function LeaderboardComponent({
           <div className="flex flex-col items-center text-center">
             <div
               className={`flex items-center justify-center bg-gray-100 rounded-full ${
-                size === "large" ? "w-24 h-24" : "w-8 h-8"
+                size === "large"
+                  ? "w-24 h-24"
+                  : size === "medium"
+                  ? "w-16 h-16"
+                  : "w-8 h-8"
               }`}
             >
               <span
                 className={`${
-                  size === "large" ? "text-2xl" : "text-sm"
+                  size === "large"
+                    ? "text-2xl"
+                    : size === "medium"
+                    ? "text-xl"
+                    : "text-sm"
                 } font-medium text-gray-600`}
               >
                 +{leaderboard.length - limit}
