@@ -20,7 +20,7 @@ export default function StatsCards({
   );
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-wrap gap-0 sm:gap-2 w-full">
       {Object.entries(stats)
         .filter(
           ([, stats]) =>
@@ -28,16 +28,21 @@ export default function StatsCards({
             (stats.stats.inbound.value > 0 || stats.stats.outbound.value > 0)
         )
         .map(([tokenAddress, stats]) => (
-          <CryptoCardCompact
-            className="w-60"
-            name={stats.token.chain}
+          <div
+            className="w-1/2 sm:w-60 p-1 sm:p-0"
             key={`${stats.token.chain}:${tokenAddress}`}
-            symbol={stats.token.symbol}
-            netAmount={stats.stats.all.net ?? 0}
-            inbound={stats.stats.inbound.value}
-            outbound={stats.stats.outbound.value}
-            iconUrl={stats.token.imageUrl}
-          />
+          >
+            <CryptoCardCompact
+              className="w-48 sm:w-60"
+              name={stats.token.chain}
+              key={`${stats.token.chain}:${tokenAddress}`}
+              symbol={stats.token.symbol}
+              netAmount={stats.stats.all.net ?? 0}
+              inbound={stats.stats.inbound.value}
+              outbound={stats.stats.outbound.value}
+              iconUrl={stats.token.imageUrl}
+            />
+          </div>
         ))}
     </div>
   );

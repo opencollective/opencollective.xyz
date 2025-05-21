@@ -32,7 +32,6 @@ export default function MonthlySection({
   live?: boolean;
 }) {
   const router = useRouter();
-  console.log(">>> MonthlySection component: filter", filter);
 
   const [transactions, setTransactions] =
     useState<Transaction[]>(initialTransactions);
@@ -69,8 +68,6 @@ export default function MonthlySection({
       setTransactions((prev) => {
         return [...prev, ...newTransactions];
       });
-    } else {
-      console.log(">>> MonthlySection: No new transactions", newTransactions);
     }
   }, [newTransactions]);
 
@@ -83,12 +80,6 @@ export default function MonthlySection({
     direction: TransactionDirection;
     tokenType: TokenType;
   }) => {
-    console.log(
-      ">>> MonthlySection: handleProfileClick",
-      uri,
-      direction,
-      tokenType
-    );
     const address = getAddressFromURI(uri);
     const d = new Date(transactions[0].timestamp * 1000);
     if (address) {
@@ -108,8 +99,8 @@ export default function MonthlySection({
 
   return (
     <div>
-      <div className="grid grid-cols-10 gap-4 items-start">
-        <div className="mb-8 col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-10 gap-4 items-start">
+        <div className="sm:mb-8 col-span-1 md:col-span-2">
           <h2 className="text-xl font-semibold mb-4">
             {filter.dateRange?.label}
           </h2>
@@ -121,7 +112,7 @@ export default function MonthlySection({
             />
           </div>
         </div>
-        <div className="col-span-8 h-full">
+        <div className="col-span-1 md:col-span-8 h-full">
           {filter.address && (
             <>
               <AddressInfo

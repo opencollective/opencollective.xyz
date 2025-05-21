@@ -48,8 +48,6 @@ function applyTxFilter(
   // Apply value filter
   if (tx.value === "0") {
     return false;
-  } else {
-    console.log(">>> applyTxFilter tx.value", tx.value);
   }
 
   // Apply token filter

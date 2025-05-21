@@ -25,7 +25,7 @@ const CryptoCardCompact = ({
   return (
     <div
       className={cn(
-        "w-full max-w-sm rounded-lg border bg-white dark:bg-slate-800 p-4",
+        "w-full max-w-sm rounded-lg border bg-white dark:bg-slate-800 p-1 sm:p-4",
         className
       )}
     >
@@ -40,7 +40,7 @@ const CryptoCardCompact = ({
             )}
           </div>
           <div>
-            <h3 className="font-medium text-slate-900 dark:text-white">
+            <h3 className="font-medium text-slate-900 dark:text-white text-sm sm:text-lg">
               {symbol}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">{name}</p>
@@ -56,7 +56,7 @@ const CryptoCardCompact = ({
               : "text-rose-600 dark:text-rose-400"
           )}
         >
-          <div className="text-lg font-bold">
+          <div className="text-base sm:text-lg font-bold">
             {isPositive ? "+" : ""}
             {netAmount.toFixed(2)}
           </div>

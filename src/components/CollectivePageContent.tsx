@@ -75,16 +75,18 @@ export default function CollectivePageContent({
   const tokens = getUniqueTokensFromTransactions(transactions);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="mt-16">
+    <div className="flex flex-col gap-4 sm:gap-8">
+      <div className="mt-8 sm:mt-16">
         <GlobalLeaderboard
           transactions={transactions}
           collectiveConfig={collectiveConfig}
         />
       </div>
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold">Transactions by month</h2>
-        <div className="flex flex-col gap-16">
+      <div className="mt-8 sm:mt-16">
+        <h2 className="text-xl sm:text-2xl font-bold mb-0 sm:mb-4">
+          Transactions by month
+        </h2>
+        <div className="flex flex-col gap-8 sm:gap-16">
           {pastMonths.map((month, i) => (
             <MonthlySection
               key={month.label}

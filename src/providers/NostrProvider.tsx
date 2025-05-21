@@ -113,6 +113,7 @@ const getKindFromURI = (uri: URI): string => {
 export function NostrProvider({ children }: { children: React.ReactNode }) {
   const poolRef = useRef<SimplePool | null>(null);
   const connectedRelaysRef = useRef<string[]>([]);
+  const connectionAttemptsRef = useRef<number>(0);
   const [notesByURI, setNotesByURI] = useState<Record<string, NostrEvent[]>>(
     {}
   ); // Stores kind 1111 events
@@ -277,14 +278,20 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
   const createNewSubscription = useCallback(
     (uris: URI[], groupIndex: number) => {
       if (!poolRef.current) return;
-
-      if (connectedRelaysRef.current.length === 0) {
+      if (connectionAttemptsRef.current > 10) {
         console.log(
-          ">>> NostrProvider createNewSubscription: no relays, retrying in 1s"
+          ">>> NostrProvider createNewSubscription: too many connection attempts"
+        );
+        return;
+      }
+      if (connectedRelaysRef.current.length === 0) {
+        connectionAttemptsRef.current++;
+        console.log(
+          ">>> NostrProvider createNewSubscription: no relays, retrying in 2s"
         );
         setTimeout(() => {
           createNewSubscription(uris, groupIndex);
-        }, 1000);
+        }, 2000);
         return;
       }
 
