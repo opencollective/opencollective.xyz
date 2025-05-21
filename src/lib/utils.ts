@@ -30,6 +30,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const formatAmount = (amount: number) => {
+  const locale =
+    typeof window !== "undefined" ? window.navigator.language : "en-US";
+  return amount.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 export const formatNumber = (
   number: number,
   precision?: number,

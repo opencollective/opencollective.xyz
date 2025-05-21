@@ -66,11 +66,11 @@ export default function SideSummary({
   const walletAddresses = getWalletAddresses(collectiveConfig.slug);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 sm:space-y-16">
+      <div className="flex items-start justify-between space-x-2">
         {/* Money In */}
         {totals.fiat && (
-          <div className="flex flex-row items-stretch gap-3">
+          <div className="flex flex-row items-stretch gap-3 w-1/2">
             <Separator />
             <div>
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money In</h2>
@@ -97,7 +97,7 @@ export default function SideSummary({
 
         {/* Money Out */}
         {totals.fiat && (
-          <div className="flex flex-row items-stretch gap-3">
+          <div className="flex flex-row items-stretch gap-3 w-1/2">
             <Separator />
             <div className="">
               <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money Out</h2>
@@ -123,58 +123,62 @@ export default function SideSummary({
         )}
       </div>
       {/* Tokens Issued */}
-      {totals.token && (
-        <div className="flex flex-row items-stretch gap-3">
-          <Separator />
-          <div>
-            <h2 className="text-lg font-light mt-0 mb-2 ml-0">Tokens Issued</h2>
-            <p className="text-xl font-light">
-              {formatNumber(totals["token"].outbound)}
-            </p>
-            <Leaderboard
-              tokenType="token"
-              direction="outbound" /* issued tokens */
-              size="small"
-              transactions={filterTransactions(
-                transactions,
-                "token",
-                "outbound",
-                walletAddresses
-              )}
-              onClick={onClick}
-              className="mt-2"
-            />
+      <div className="flex items-start justify-between space-x-2">
+        {totals.token && (
+          <div className="flex flex-row items-stretch gap-3 w-1/2">
+            <Separator />
+            <div>
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">
+                Tokens Issued
+              </h2>
+              <p className="text-xl font-light">
+                {formatNumber(totals["token"].outbound)}
+              </p>
+              <Leaderboard
+                tokenType="token"
+                direction="outbound" /* issued tokens */
+                size="small"
+                transactions={filterTransactions(
+                  transactions,
+                  "token",
+                  "outbound",
+                  walletAddresses
+                )}
+                onClick={onClick}
+                className="mt-2"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Tokens Redeemed */}
-      {totals.token && (
-        <div className="flex flex-row items-stretch gap-3">
-          <Separator />
-          <div>
-            <h2 className="text-lg font-light mt-0 mb-2 ml-0">
-              Tokens Redeemed
-            </h2>
-            <p className="text-xl font-light">
-              {formatNumber(totals["token"].inbound)}
-            </p>
-            <Leaderboard
-              tokenType="token"
-              direction="inbound" /* redeemed tokens */
-              size="small"
-              transactions={filterTransactions(
-                transactions,
-                "token",
-                "inbound",
-                walletAddresses
-              )}
-              onClick={onClick}
-              className="mt-2"
-            />
+        {/* Tokens Redeemed */}
+        {totals.token && (
+          <div className="flex flex-row items-stretch gap-3 w-1/2">
+            <Separator />
+            <div>
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">
+                Tokens Redeemed
+              </h2>
+              <p className="text-xl font-light">
+                {formatNumber(totals["token"].inbound)}
+              </p>
+              <Leaderboard
+                tokenType="token"
+                direction="inbound" /* redeemed tokens */
+                size="small"
+                transactions={filterTransactions(
+                  transactions,
+                  "token",
+                  "inbound",
+                  walletAddresses
+                )}
+                onClick={onClick}
+                className="mt-2"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function CollectivePageContent({
           collectiveConfig={collectiveConfig}
         />
       </div>
-      <div className="mt-8 sm:mt-16">
+      <div className="mt-4 sm:mt-16">
         <h2 className="text-xl sm:text-2xl font-bold mb-0 sm:mb-4">
           Transactions by month
         </h2>

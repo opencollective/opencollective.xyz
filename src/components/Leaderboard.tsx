@@ -7,6 +7,7 @@ import {
   getLeaderboard,
   Leaderboard,
   LeaderboardEntry,
+  formatAmount,
 } from "@/lib/utils";
 import { useNostr } from "@/providers/NostrProvider";
 import { TokenType, Transaction, TransactionDirection, URI } from "@/types";
@@ -89,11 +90,11 @@ export default function LeaderboardComponent({
                   entry.stats.all.count
                 }${
                   direction === "outbound"
-                    ? `\nInbound: ${entry.stats.inbound.value}` // for outbound transactions, we show the list of people who have received the tokens
+                    ? `\nAmount: ${formatAmount(entry.stats.inbound.value)}` // for outbound transactions, we show the list of people who have received the tokens
                     : ""
                 }${
                   direction === "inbound"
-                    ? `\nOutbound: ${entry.stats.outbound.value}`
+                    ? `\nAmount: ${formatAmount(entry.stats.outbound.value)}`
                     : ""
                 }${
                   direction === "internal"
