@@ -202,7 +202,7 @@ export function TransactionRow({ tx, collectiveSlug }: TransactionRowProps) {
             </Link>
 
             {/* Add USD equivalent for non-USD tokens */}
-            {fxrate !== 1 && (
+            {fxrate && fxrate !== 1 && (
               <div
                 className="text-sm text-muted-foreground"
                 title={`1 ${tx.token.symbol} ≈ ${fxrate.toFixed(

@@ -77,9 +77,9 @@
     {
       "slug": "opencollective",
       "profile": {
-        "name": "Open Collective",
+        "name": "Open Collective DAO",
         "picture": "https://pbs.twimg.com/profile_images/718469174675177472/f7YQoBux_400x400.jpg",
-        "about": "Platform to manage your finance transparently",
+        "about": "Manage your collective the open source way",
         "website": "https://opencollective.com"
       },
       "primaryCurrency": "USD",
@@ -90,12 +90,57 @@
         },
         {
           "type": "blockchain",
-          "chain": "arbitrum",
+          "chain": "ethereum",
+          "label": "Open Collective hotwallet",
           "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
           "tokens": [
             "USDC",
+            "ETH",
             "USDGLO",
             "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "arbitrum",
+          "label": "Open Collective hotwallet",
+          "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
+          "tokens": [
+            "USDC",
+            "ETH",
+            "USDGLO",
+            "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "arbitrum",
+          "label": "Open Collective DAO multisig",
+          "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
+          "tokens": [
+            "USDC",
+            "ETH",
+            "USDGLO",
+            "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "label": "Open Collective DAO multisig",
+          "address": "0x5FBd1611897682605018c1b44d1EdeF61228953E",
+          "tokens": [
+            "ETH",
+            "USDC"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "base",
+          "address": "0x5FBd1611897682605018c1b44d1EdeF61228953E",
+          "tokens": [
+            "ETH",
+            "USDC"
           ]
         }
       ]
