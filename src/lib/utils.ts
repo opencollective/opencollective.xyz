@@ -30,12 +30,38 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const formatAmount = (amount: number) => {
+export const getCurrencySymbol = (currency: FiatCurrencySymbol) => {
+  switch (currency) {
+    case "USD":
+      return "$";
+    case "EUR":
+      return "€";
+    case "GBP":
+      return "£";
+    case "JPY":
+      return "¥";
+    case "CHF":
+      return "CHF";
+    case "CAD":
+      return "CA$";
+    case "AUD":
+      return "A$";
+  }
+};
+
+export const formatAmount = (
+  amount: number,
+  options: { precision?: number } = {}
+) => {
   const locale =
     typeof window !== "undefined" ? window.navigator.language : "en-US";
   return amount.toLocaleString(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: isNaN(options.precision || 2)
+      ? 2
+      : options.precision || 2,
+    maximumFractionDigits: isNaN(options.precision || 2)
+      ? 2
+      : options.precision || 2,
   });
 };
 
@@ -238,22 +264,43 @@ export const getFxRate = (
   date: Date
 ) => {
   const ts = date.toISOString().split("T")[0].replace(/-/g, "");
+  let fxRate = 1;
   if (fromToken.symbol === "ETH" && toCurrency === "USD") {
-    return ethUsdFxrate[ts as keyof typeof ethUsdFxrate];
+    fxRate = ethUsdFxrate[ts as keyof typeof ethUsdFxrate];
+    if (!fxRate) {
+      console.log(">>> No fx rate for ETH:USD on", ts);
+      return 0;
+    }
   }
   if (fromToken.symbol === "GTC" && toCurrency === "USD") {
-    return gtcUsdFxrate[ts as keyof typeof gtcUsdFxrate];
+    fxRate = gtcUsdFxrate[ts as keyof typeof gtcUsdFxrate];
+    if (!fxRate) {
+      console.log(">>> No fx rate for GTC:USD on", ts);
+      return 0;
+    }
   }
   if (fromToken.symbol === "GLM" && toCurrency === "USD") {
-    return glmUsdFxrate[ts as keyof typeof glmUsdFxrate];
+    fxRate = glmUsdFxrate[ts as keyof typeof glmUsdFxrate];
+    if (!fxRate) {
+      console.log(">>> No fx rate for GLM:USD on", ts);
+      return 0;
+    }
   }
   if (fromToken.symbol === "ARB" && toCurrency === "USD") {
-    return arbUsdFxrate[ts as keyof typeof arbUsdFxrate];
+    fxRate = arbUsdFxrate[ts as keyof typeof arbUsdFxrate];
+    if (!fxRate) {
+      console.log(">>> No fx rate for ARB:USD on", ts);
+      return 0;
+    }
   }
   if (fromToken.symbol === "CELO" && toCurrency === "USD") {
-    return celoUsdFxrate[ts as keyof typeof celoUsdFxrate];
+    fxRate = celoUsdFxrate[ts as keyof typeof celoUsdFxrate];
+    if (!fxRate) {
+      console.log(">>> No fx rate for CELO:USD on", ts);
+      return 0;
+    }
   }
-  return 1;
+  return fxRate;
 };
 
 export const getPrimaryToken = (
@@ -396,7 +443,7 @@ export function getLeaderboard(
 }
 
 export const generateAvatar = (address: string) => {
-  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`;
+  return `/api/avatar?seed=${address}`;
 };
 
 export const getAddressFromURI = (uri: string): Address => {

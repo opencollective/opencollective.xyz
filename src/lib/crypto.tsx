@@ -9,9 +9,9 @@ export async function getTransactions(
   chain: string,
   contractaddress: string | null,
   address?: string | null,
-  type: "token" | "native" = "token"
+  action: "tokentx" | "txlist" | "txlistinternal" = "tokentx"
 ): Promise<EtherscanTransfer[]> {
-  const parts = [chain, contractaddress, "address", address, type].filter(
+  const parts = [chain, contractaddress, "address", address, action].filter(
     Boolean
   );
   const key = parts.join(":");
@@ -19,7 +19,7 @@ export async function getTransactions(
   const cachedObject = cache.get<EtherscanTransfer[]>(key, {
     ttl: 1000 * 60 * 60, // 1 hour
     gracePeriod: 1000 * 60 * 60 * 24, // 1 day
-    refresh: () => getTransactions(chain, contractaddress, address, type),
+    refresh: () => getTransactions(chain, contractaddress, address, action),
   });
   console.log(
     ">>> getTransactions key",
@@ -31,12 +31,12 @@ export async function getTransactions(
     return cachedObject;
   }
 
-  console.log(">>> getTransactions", chain, contractaddress, address, type);
+  console.log(">>> getTransactions", chain, contractaddress, address, action);
 
   const params = new URLSearchParams({
     chain,
     module: "account",
-    action: type === "token" ? "tokentx" : "txlist",
+    action,
     startblock: "0",
     endblock: "99999999",
     sort: "desc",
@@ -46,7 +46,7 @@ export async function getTransactions(
   if (address) {
     params.set("address", address);
   }
-  if (contractaddress && type === "token") {
+  if (contractaddress && action === "tokentx") {
     params.set("contractaddress", contractaddress);
   }
 

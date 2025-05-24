@@ -117,12 +117,25 @@ export const getTransactionsForCollective = async (
           wallet.chain,
           null,
           wallet.address.split("/")[0],
-          "native"
+          "txlist"
         );
         if (Array.isArray(txsNative) && txsNative?.length > 0) {
           addTransactions(
             wallet.chain,
             txsNative,
+            getTokenDetailsFromAddress(wallet.chain, "native")
+          );
+        }
+        const txsNativeInternal = await getTransactions(
+          wallet.chain,
+          null,
+          wallet.address.split("/")[0],
+          "txlistinternal"
+        );
+        if (Array.isArray(txsNativeInternal) && txsNativeInternal?.length > 0) {
+          addTransactions(
+            wallet.chain,
+            txsNativeInternal,
             getTokenDetailsFromAddress(wallet.chain, "native")
           );
         }

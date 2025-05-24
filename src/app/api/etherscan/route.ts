@@ -75,8 +75,8 @@ export async function GET(req: Request) {
     params.set("contractaddress", contractaddress);
   }
 
+  const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
   try {
-    const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
     console.log("/api/etherscan: apicall", apicall);
     const response = await fetch(apicall);
     const data = await response.json();
@@ -95,7 +95,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (e) {
-    console.error(e);
+    console.error(`API call failed: ${apicall}`, e);
     return Response.json(
       { error: `Failed to fetch transactions` },
       { status: 500 }

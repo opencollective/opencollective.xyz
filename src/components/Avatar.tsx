@@ -163,7 +163,7 @@ export default function Avatar({
       title={title || profile?.name || profile?.address}
       data-uri={uri}
       className={cn(
-        "h-12 w-12 border-2 border-gray-300 uppercase text-gray-500",
+        "h-12 w-12  uppercase text-gray-500",
         className,
         "cursor-pointer hover:ring-2 hover:ring-primary transition-all"
       )}

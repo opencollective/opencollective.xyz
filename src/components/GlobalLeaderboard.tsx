@@ -73,7 +73,7 @@ export default function SideSummary({
           <div className="flex flex-row items-stretch gap-3 w-1/2">
             <Separator />
             <div>
-              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money In</h2>
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Revenue</h2>
               <p className="text-xl font-light text-green-400">
                 + {getShortSymbol(collectiveConfig.primaryCurrency)}
                 {formatNumber(totals["fiat"].inbound)}
@@ -100,7 +100,7 @@ export default function SideSummary({
           <div className="flex flex-row items-stretch gap-3 w-1/2">
             <Separator />
             <div className="">
-              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Money Out</h2>
+              <h2 className="text-lg font-light mt-0 mb-2 ml-0">Spending</h2>
               <p className="text-xl font-light text-pink-400">
                 - {getShortSymbol(collectiveConfig.primaryCurrency)}
                 {formatNumber(totals["fiat"].outbound)}
