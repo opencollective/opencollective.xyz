@@ -32,9 +32,13 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          NEXT_PUBLIC_WEBAPP_URL: http://localhost:3000
 
       - name: Build project
         run: npm run build
+        env:
+          NEXT_PUBLIC_WEBAPP_URL: http://localhost:3000
 
   # This job will only run on pull requests and ensures all checks pass
   check-pr:
