@@ -1,29 +1,193 @@
 {
   "collectives": [
     {
-      "slug": "citizenspring",
-      "name": "Citizen Spring",
+      "slug": "atlantisdao.eth",
+      "profile": {
+        "name": "Atlantis DAO",
+        "picture": "https://euc.li/atlantisdao.eth",
+        "about": "A co-op of creators, makers and doers, accelerating the adoption of regeneration, circularity and sustainability. ",
+        "website": "https://www.atlantisp2p.com/"
+      },
+      "primaryCurrency": "USD",
       "wallets": [
         {
           "type": "blockchain",
-          "chain": "gnosis",
-          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf",
-          "type": "multisig",
+          "chain": "ethereum",
+          "address": "0xfbCA78474A09E2BF3543f4Fc1037152ea2c6C32d",
           "tokens": [
-            {
-              "symbol": "EURe",
-              "chain": "gnosis",
-              "address": "0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430",
-              "decimals": 18,
-              "imageUrl": "https://s2.coinmarketcap.com/static/img/coins/200x200/20920.png"
-            }
+            "ETH",
+            "WETH",
+            "GLM",
+            "GTC",
+            "DAI",
+            "USDC",
+            "USDT",
+            "USDGLO",
+            "ARB",
+            "DAI",
+            "WETH"
           ]
         }
       ]
     },
     {
+      "slug": "genukraine",
+      "profile": {
+        "name": "GEN Ukraine",
+        "picture": "https://pbs.twimg.com/profile_images/1815354211183345664/6xzyN7Gy_400x400.jpg",
+        "about": "Global Ecovillage Network Ukraine",
+        "website": "https://genukraine.com.ua"
+      },
+      "primaryCurrency": "USD",
+      "wallets": [
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0x5157D8fF3FCfacAC630A1cB5bC9902dCC8433260",
+          "tokens": [
+            "ETH",
+            "WETH",
+            "GLM",
+            "GTC",
+            "DAI",
+            "USDC"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "celo",
+          "address": "0x1DfC4C1acBc8aBa992dC85dd1282b64708081829",
+          "tokens": [
+            "CELO",
+            "CUSD",
+            "USDGLO"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "vdao",
+      "profile": {
+        "name": "VDAO",
+        "picture": "https://pbs.twimg.com/profile_images/1799160927750680576/KPNr_sNq_400x400.jpg",
+        "about": "A common for the commons in Brussels",
+        "website": "https://vdao.earth"
+      }
+    },
+    {
+      "slug": "opencollective",
+      "profile": {
+        "name": "Open Collective DAO",
+        "picture": "https://pbs.twimg.com/profile_images/718469174675177472/f7YQoBux_400x400.jpg",
+        "about": "Manage your collective the open source way",
+        "website": "https://opencollective.com"
+      },
+      "primaryCurrency": "USD",
+      "wallets": [
+        {
+          "type": "opencollective",
+          "hostSlug": "opencollective"
+        },
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "label": "Open Collective hotwallet",
+          "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
+          "tokens": [
+            "USDC",
+            "ETH",
+            "USDGLO",
+            "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "arbitrum",
+          "label": "Open Collective hotwallet",
+          "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
+          "tokens": [
+            "USDC",
+            "ETH",
+            "USDGLO",
+            "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "arbitrum",
+          "label": "Open Collective DAO multisig",
+          "address": "0xae8c53e5f4375b114b669716B0B5FFC4f56F78d4",
+          "tokens": [
+            "USDC",
+            "ETH",
+            "USDGLO",
+            "ARB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "label": "Open Collective DAO multisig",
+          "address": "0x5FBd1611897682605018c1b44d1EdeF61228953E",
+          "tokens": [
+            "ETH",
+            "USDC"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "base",
+          "address": "0x5FBd1611897682605018c1b44d1EdeF61228953E",
+          "tokens": [
+            "ETH",
+            "USDC"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "citizenspring",
+      "profile": {
+        "name": "Citizen Spring",
+        "picture": "https://pbs.twimg.com/profile_images/1282422789610377218/DFnNAXQ-_400x400.jpg",
+        "about": "Citizens coming together to rebuild local communities",
+        "website": "https://citizenspring.earth"
+      },
+      "primaryCurrency": "EUR",
+      "wallets": [
+        {
+          "type": "blockchain",
+          "chain": "gnosis",
+          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf",
+          "tokens": [
+            "EURE"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "label": "fridge",
+          "chain": "gnosis",
+          "address": "0x8b120C5756b86dE2cdeBf53C08D8bDD36f897c03",
+          "tokens": [
+            "EURB"
+          ]
+        },
+        {
+          "type": "opencollective",
+          "hostSlug": "citizenspring-asbl",
+          "currency": "EUR"
+        }
+      ]
+    },
+    {
       "slug": "commonshub-brussels",
-      "name": "Commons Hub Brussels",
+      "profile": {
+        "name": "Commons Hub Brussels",
+        "picture": "https://pbs.twimg.com/profile_images/1799160927750680576/KPNr_sNq_400x400.jpg",
+        "about": "A common space to meet, dream and work. \nA common for the commons in Brussels",
+        "website": "https://commonshub.brussels"
+      },
+      "primaryCurrency": "EUR",
       "tokens": [
         {
           "symbol": "CHT",
@@ -33,49 +197,35 @@
           "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
         }
       ],
+      "ignoreTxs": [
+        "0x42262de0f79d40de757f8fd08afb1927d693b7f033ff6fc828c1d30d19dfefa3",
+        "0x1a93cfa2f712079e9ee4657ab22eb6f170dfbbd1d559991e759d364690008ffb"
+      ],
       "wallets": [
         {
           "type": "blockchain",
-          "chain": "gnosis",
-          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf/commonshub",
           "label": "citizenspring-monerium",
+          "chain": "gnosis",
+          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf",
           "tokens": [
-            {
-              "symbol": "EURe",
-              "chain": "gnosis",
-              "address": "0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430",
-              "decimals": 18,
-              "imageUrl": "https://s2.coinmarketcap.com/static/img/coins/200x200/20920.png"
-            }
+            "EURE"
           ]
         },
         {
           "type": "blockchain",
+          "label": "fridge",
           "chain": "gnosis",
           "address": "0x8b120C5756b86dE2cdeBf53C08D8bDD36f897c03",
-          "label": "fridge",
           "tokens": [
-            {
-              "symbol": "EURb",
-              "chain": "gnosis",
-              "address": "0x5815E61eF72c9E6107b5c5A05FD121F334f7a7f1",
-              "decimals": 6,
-              "imageUrl": "https://assets.citizenwallet.xyz/wallet-config/_images/wallet.pay.brussels.png"
-            }
+            "EURB"
           ]
         },
         {
           "type": "blockchain",
           "chain": "celo",
           "address": "0x0000000000000000000000000000000000000000",
-          "token": [
-            {
-              "symbol": "CHT",
-              "name": "Commons Hub Token",
-              "chain": "celo",
-              "address": "0x65dd32834927de9e57e72a3e2130a19f81c6371d",
-              "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
-            }
+          "tokens": [
+            "CHT"
           ]
         },
         {
@@ -83,6 +233,89 @@
           "hostSlug": "citizenspring-asbl",
           "collectiveSlug": "commonshub-brussels",
           "currency": "EUR"
+        }
+      ]
+    },
+    {
+      "slug": "regensunite",
+      "profile": {
+        "name": "Regens Unite",
+        "picture": "https://pbs.twimg.com/profile_images/1640680588037304320/-ADQ0O1Y_400x400.jpg",
+        "about": "Bringing all the regens together. \nCommunity is immunity.",
+        "website": "https://regensunite.earth"
+      },
+      "primaryCurrency": "USD",
+      "wallets": [
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0x08e40e1C0681D072a54Fc5868752c02bb3996FFA",
+          "tokens": [
+            "ETH",
+            "WETH",
+            "USDC",
+            "DAI",
+            "USDT"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "arbitrum",
+          "address": "0x08e40e1C0681D072a54Fc5868752c02bb3996FFA",
+          "tokens": [
+            "USDC",
+            "USDGLO",
+            "ARB",
+            "DAI"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "polygon",
+          "address": "0x08e40e1C0681D072a54Fc5868752c02bb3996FFA",
+          "tokens": [
+            "USDC",
+            "USDT",
+            "WETH",
+            "DAI",
+            "EURE"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "celo",
+          "address": "0x08e40e1C0681D072a54Fc5868752c02bb3996FFA",
+          "tokens": [
+            "USDC",
+            "CUSD",
+            "CELO",
+            "USDGLO"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "optimism",
+          "address": "0x08e40e1C0681D072a54Fc5868752c02bb3996FFA",
+          "tokens": [
+            "USDC",
+            "USDGLO",
+            "DAI",
+            "WETH",
+            "GIV",
+            "OP"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0x371cA2c8f1D02864C7306e5E5Ed5DC6edF2DD19c",
+          "tokens": [
+            "USDC",
+            "USDT",
+            "USDGLO",
+            "DAI",
+            "WETH"
+          ]
         }
       ]
     }

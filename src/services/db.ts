@@ -186,10 +186,6 @@ class Database extends Dexie {
   }
 }
 
-let db: Database;
-
-if (typeof window !== "undefined") {
-  db = new Database();
-}
+const db = typeof window !== "undefined" ? new Database() : null;
 
 export { db };

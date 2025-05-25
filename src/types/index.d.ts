@@ -1,5 +1,5 @@
 type HexString<Length extends number> = `0x${string}` & { length: Length };
-export type Address = HexString<42>;
+export type Address = Lowercase<HexString<42>>;
 
 type BitcoinAddress =
   | `1${string}` // Legacy addresses
@@ -11,11 +11,27 @@ export type TxId = HexString<64>;
 export type ChainId = number;
 export type Blockchain = "ethereum" | "bitcoin";
 export type AddressType = "address" | "tx";
+export type TransactionDirection = "inbound" | "outbound" | "internal" | "all";
+export type TokenType = "fiat" | "token";
 export type URI =
   | `ethereum:${ChainId}:address:${Address}`
   | `ethereum:${ChainId}:tx:${TxHash}`
   | `bitcoin:address:${BitcoinAddress}`
   | `bitcoin:tx:${TxId}`;
+
+export type FiatCurrencySymbol =
+  | "USD"
+  | "EUR"
+  | "GBP"
+  | "JPY"
+  | "CHF"
+  | "CAD"
+  | "AUD"
+  | "NZD"
+  | "CNY"
+  | "HKD"
+  | "SGD"
+  | "INR";
 
 export type Token = {
   name?: string;
@@ -26,20 +42,20 @@ export type Token = {
   imageUrl?: string;
 };
 
+export type TxStats = Record<
+  TransactionDirection,
+  {
+    count: number;
+    value: number;
+    net?: number;
+  }
+>;
+
 export type TokenStats = {
   token: Token;
-  txCount: number;
-  inbound: {
-    count: number;
-    value: number;
-  };
-  outbound: {
-    count: number;
-    value: number;
-  };
-  totalVolume: number;
-  netValue: number;
+  stats: TxStats;
 };
+
 export interface Transaction {
   blockNumber: number;
   chainId: number;
@@ -95,9 +111,28 @@ export type ChainConfig = {
 
 export type WalletConfig = {
   type: "blockchain" | "opencollective";
+  chain: string;
   address: string;
-  tokens?: Token[];
+  tokens: string[]; // token symbols
   hostSlug?: string;
   collectiveSlug?: string;
   currency?: string;
+};
+
+export type CollectiveConfig = {
+  slug: string;
+  tokens?: Token[];
+  wallets: WalletConfig[];
+  primaryCurrency: FiatCurrencySymbol;
+  profile: ProfileData;
+  ignoreTxs?: string[];
+};
+
+export type ProfileData = {
+  uri?: URI;
+  address?: Address | undefined;
+  name?: string;
+  about?: string;
+  picture?: string;
+  website?: string;
 };

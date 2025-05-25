@@ -2,7 +2,7 @@
 
 import { ethers, Log, JsonRpcProvider } from "ethers";
 import ERC20_ABI from "../contracts/erc20.abi.json";
-import chains from "@/chains.json";
+import chains from "@/data/chains.json";
 import { useState, useEffect, useRef } from "react";
 import type {
   Transaction,
@@ -10,39 +10,11 @@ import type {
   EtherscanTransfer,
   Address,
   TxHash,
-} from "@/types/index.d.ts";
+} from "@/types";
 import * as crypto from "./crypto.server";
+import { cache } from "./cache";
+
 export const truncateAddress = crypto.truncateAddress;
-
-const cache = {};
-const localStorage =
-  typeof window !== "undefined"
-    ? window.localStorage
-    : {
-        getItem: (key: string) => {
-          return cache[key as keyof typeof cache];
-        },
-        setItem: (key: string, value: string) => {
-          (cache as Record<string, string>)[key] = value;
-        },
-        removeItem: (key: string) => {
-          delete (cache as Record<string, string>)[key];
-        },
-      };
-
-const setItem = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value);
-  } catch (err) {
-    console.error(
-      "Error setting item:",
-      err,
-      "item length:",
-      value.length,
-      `${((value.length * 2) / 1024 / 1024).toFixed(2)}MB`
-    );
-  }
-};
 
 export const getBlockTimestamp = async (
   chain: string,
@@ -50,16 +22,16 @@ export const getBlockTimestamp = async (
   provider: JsonRpcProvider
 ) => {
   const key = `${chain}:${blockNumber}`;
-  const cached = localStorage.getItem(key);
-  if (cached) {
-    return JSON.parse(cached);
+  const cached = await cache.get<number>(key);
+  if (cached !== null) {
+    return cached;
   }
 
   const block = await provider.getBlock(blockNumber);
   if (!block) {
     throw new Error(`Block not found: ${blockNumber}`);
   }
-  setItem(key, block.timestamp.toString());
+  cache.set(key, block.timestamp);
   return block.timestamp;
 };
 
@@ -67,15 +39,13 @@ export async function getTokenDetails(
   chain: string,
   contractAddress: string,
   provider: JsonRpcProvider
-) {
+): Promise<Token | null> {
   try {
-    // Check cache first
     const key = `${chain}:${contractAddress}`;
-    const cached = localStorage.getItem(key);
+    const cached = await cache.get<Token>(key);
+
     if (cached) {
-      const res = JSON.parse(cached);
-      res.cached = true;
-      return res;
+      return cached as Token;
     }
 
     // Validate contract address
@@ -91,30 +61,25 @@ export async function getTokenDetails(
       contract.decimals(),
     ]);
 
-    const tokenDetails = {
-      name,
-      symbol,
+    const tokenDetails: Token = {
+      chain,
+      name: (name || "Unknown Token") as string,
+      symbol: (symbol || "???") as string,
       decimals: Number(decimals),
-      address: contractAddress,
+      address: contractAddress as Address,
     };
 
-    // Cache the result
-    setItem(
-      key,
-      JSON.stringify(tokenDetails, (_, value) =>
-        typeof value === "bigint" ? value.toString() : value
-      )
-    );
-
-    return tokenDetails;
+    cache.set(key, tokenDetails);
+    return tokenDetails as Token;
   } catch (err) {
     console.error("Error fetching token details:", err);
     return {
+      chain,
       name: "Unknown Token",
       symbol: "???",
       decimals: 18,
-      address: contractAddress,
-    };
+      address: contractAddress as Address,
+    } as Token;
   }
 }
 
@@ -128,14 +93,14 @@ type TxDetails = {
   chainId: number;
   hash: string;
   contract_address: string;
-  name: string;
+  function?: string | null;
+  name: string | null;
   args: string[];
-  token: Token;
+  token?: Token;
   events: LogEvent[];
 };
 
 export function useTxDetails(chain: string, txHash?: string) {
-  console.log(">>> useTxDetails", chain, txHash);
   const [txDetails, setTxDetails] = useState<TxDetails | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -151,11 +116,13 @@ export function useTxDetails(chain: string, txHash?: string) {
       if (!txHash) return;
       try {
         const tx = await getTxDetails(txHash, provider.current);
+        if (!tx) return;
         const token = await getTokenDetails(
           chain,
           tx.contract_address,
           provider.current
         );
+        if (!token) return;
         setTxDetails({ ...tx, token });
         setIsLoading(false);
       } catch (err) {
@@ -175,9 +142,9 @@ export async function getAddressType(
   provider: JsonRpcProvider
 ): Promise<"eoa" | "contract" | "token" | undefined> {
   const key = `${chain}:${address}:type`;
-  const cached = localStorage.getItem(key);
+  const cached = await cache.get<"eoa" | "contract" | "token">(key);
   if (cached) {
-    return cached as "eoa" | "contract" | "token";
+    return cached;
   }
   const code = await provider.getCode(address);
   let res: "eoa" | "contract" | "token" | undefined;
@@ -227,16 +194,20 @@ export async function getAddressType(
       }
     }
   }
-  setItem(key, res);
+  cache.set(key, res);
   return res;
 }
 
-export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
+export async function getTxDetails(
+  tx_hash: string,
+  provider: JsonRpcProvider
+): Promise<TxDetails | null> {
   const tx = await provider.getTransaction(tx_hash);
   if (!tx?.to) return null;
 
-  if (localStorage.getItem(tx.hash)) {
-    return JSON.parse(localStorage.getItem(tx.hash) || "{}");
+  const cached = await cache.get<TxDetails>(tx.hash);
+  if (cached) {
+    return cached;
   }
 
   const contract = new ethers.Contract(tx.to, ERC20_ABI, provider);
@@ -249,7 +220,7 @@ export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
     let name = decoded?.name;
     let args = decoded?.args ? Array.from(decoded.args) : [];
     // Parse all logs from the receipt
-    const events = receipt?.logs
+    const events: LogEvent[] = receipt?.logs
       .map((log) => {
         try {
           // Create a new contract instance with the log's address
@@ -280,30 +251,28 @@ export async function getTxDetails(tx_hash: string, provider: JsonRpcProvider) {
           return null;
         }
       })
-      .filter((e) => Boolean(e?.name)); // Remove null entries
+      .filter((e) => Boolean(e?.name)) as LogEvent[]; // Remove null entries
 
-    const res = {
+    const res: TxDetails = {
       chainId: Number(tx.chainId),
       hash: tx.hash,
       contract_address, // This might be different from tx.to if it's a proxy
-      name,
+      name: name as string,
+      function: decoded?.name,
       args,
       events,
     };
 
-    setItem(
-      tx.hash,
-      JSON.stringify(res, (_, value) =>
-        typeof value === "bigint" ? value.toString() : value
-      )
-    );
+    cache.set(tx.hash, res);
 
     return res;
   } catch (error) {
     console.error("Error decoding transaction:", error);
     return {
+      chainId: Number(tx.chainId),
+      hash: tx.hash,
+      name: null,
       contract_address: tx.to,
-      from: tx.from,
       function: null,
       args: [],
       events: [],
@@ -326,16 +295,6 @@ export async function processBlockRange(
   toBlock: number,
   provider: JsonRpcProvider
 ): Promise<Transaction[]> {
-  const key =
-    `${chain}:${address}[${fromBlock}-${toBlock}]-processed`.toLowerCase();
-  // const cached = localStorage.getItem(key);
-  // if (cached && (!window.useCache || window.useCache !== false)) {
-  //   const res = JSON.parse(cached);
-  //   res.cached = true;
-  //   return res;
-  // }
-  localStorage.removeItem(key); // remove previous cache
-
   const txs = await getBlockRange(chain, address, fromBlock, toBlock, provider);
   if (txs.length > 0) {
     const newTxs: Transaction[] = await Promise.all(
@@ -346,14 +305,14 @@ export async function processBlockRange(
           provider
         );
         const token = await getTokenDetails(chain, tx.token.address, provider);
+        if (!token) return null;
         return {
           ...tx,
           timestamp,
           token,
         };
       })
-    );
-    // setItem(key, JSON.stringify(newTxs));
+    ).then((txs) => txs.filter((tx): tx is Transaction => tx !== null));
     return newTxs;
   } else {
     return [];
@@ -378,15 +337,10 @@ export async function getBlockRange(
 ): Promise<Transaction[]> {
   const key =
     `${chain}:${accountAddress}[${fromBlock}-${toBlock}]`.toLowerCase();
-  const cached = localStorage.getItem(key);
-  // @ts-expect-error useCache is not defined in the window object
-  if (cached && (!window.useCache || window.useCache !== false)) {
-    const res = JSON.parse(cached);
-    res.cached = true;
-    return res;
+  const cached = await cache.get<Transaction[]>(key);
+  if (cached) {
+    return cached;
   }
-  // console.log(">>> skipping cache", key, cached, window.useCache);
-  localStorage.removeItem(key); // remove previous cache
   console.log(
     "utils/crypto.ts: getBlockRange",
     chain,
@@ -458,7 +412,7 @@ export async function getBlockRange(
     // Finally by log index
     return b.logIndex - a.logIndex;
   });
-  if (!hasError) setItem(key, JSON.stringify(res));
+  if (!hasError) cache.set(key, res);
   return res.filter((tx) => tx !== null) as Transaction[];
 }
 
@@ -487,7 +441,7 @@ export async function getTxFromLog(
     value,
     chainId,
   };
-  return tx;
+  return tx as Transaction;
 }
 
 /**
@@ -500,12 +454,6 @@ export async function getBlockRangeForAddress(
   chain: string,
   address: string
 ): Promise<null | { firstBlock: number; lastBlock: number | undefined }> {
-  // const key = `${chain}:${address}`;
-  // const cached = localStorage.getItem(key);
-  // if (cached) {
-  //   return JSON.parse(cached);
-  // }
-
   const transactions = await getTransactionsFromEtherscan(chain, address);
   if (transactions) {
     const firstBlock = Number(transactions[0].blockNumber);
@@ -514,7 +462,6 @@ export async function getBlockRangeForAddress(
         ? Number(transactions[transactions.length - 1].blockNumber)
         : undefined;
     console.log(">>> blockRangeForAddress", address, firstBlock, lastBlock);
-    // setItem(key, blockNumber.toString());
     return { firstBlock, lastBlock };
   } else {
     console.log(">>> no transactions found for", chain, address);
@@ -527,15 +474,12 @@ export async function getTransactionsFromEtherscan(
   address?: string,
   tokenAddress?: string
 ): Promise<null | Transaction[]> {
-  // const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
-  // const key = `${chain}:${address}${
-  //   tokenAddress ? `:${tokenAddress}` : ""
-  // }[0-${today}]`.toLowerCase();
-  // const cached = localStorage.getItem(key);
-  // if (cached) {
-  //   return JSON.parse(cached);
-  // }
-
+  const key_parts = [chain, tokenAddress, address];
+  const key = key_parts.filter(Boolean).join(":");
+  const cached = await cache.get<Transaction[]>(key);
+  if (cached) {
+    return cached;
+  }
   const params = new URLSearchParams({
     chain,
     module: "account",
@@ -590,7 +534,7 @@ export async function getTransactionsFromEtherscan(
           symbol: tx.tokenSymbol,
         },
       }));
-      // setItem(key, JSON.stringify(res));
+      cache.set(key, res);
       return res;
     } else {
       console.log(">>> error from /api/etherscan", data);
@@ -603,12 +547,7 @@ export async function getTransactionsFromEtherscan(
 }
 
 export function useTokenDetails(chain: string, contractAddress: string) {
-  const [token, setToken] = useState<{
-    name: string;
-    symbol: string;
-    decimals: number;
-    address: string;
-  } | null>(null);
+  const [token, setToken] = useState<Token | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -635,7 +574,7 @@ export function useTokenDetails(chain: string, contractAddress: string) {
           provider
         );
 
-        setToken(tokenDetails);
+        setToken(tokenDetails as Token);
       } catch (err) {
         console.error("Error in useTokenDetails:", err);
         setError(err instanceof Error ? err : new Error("Unknown error"));

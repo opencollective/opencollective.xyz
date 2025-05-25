@@ -5,11 +5,12 @@
     "explorer_name": "Etherscan",
     "explorer_api": "https://api.etherscan.io",
     "rpc": [
-      "https://eth.llamarpc.com",
+      "https://eth.meowrpc.com",
       "https://eth.drpc.org",
+      "https://core.gashawk.io/rpc",
+      "https://uk.rpc.blxrbdn.com",
       "https://rpc.ankr.com/eth",
-      "https://rpc.eth.gateway.fm",
-      "https://eth.meowrpc.com"
+      "https://rpc.eth.gateway.fm"
     ]
   },
   "polygon": {
@@ -61,6 +62,7 @@
     "id": 10,
     "explorer_url": "https://optimistic.etherscan.io",
     "explorer_name": "Optimistic Explorer",
+    "explorer_api": "https://api-optimistic.etherscan.io",
     "rpc": [
       "https://optimism.drpc.org",
       "https://optimism.llamarpc.com",

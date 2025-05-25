@@ -1,70 +1,67 @@
-import { ChainConfig, EtherscanTransfer } from "@/types";
-import chains from "@/chains.json";
-let cache: Record<string, EtherscanTransfer[]> = {};
+import { EtherscanTransfer } from "@/types";
+import { cache } from "@/utils/cache";
 
-setInterval(() => {
-  cache = {};
-}, 1000 * 60); // empty cache every minute
+if (!process.env.NEXT_PUBLIC_WEBAPP_URL) {
+  throw new Error("NEXT_PUBLIC_WEBAPP_URL is not set");
+}
 
 export async function getTransactions(
   chain: string,
   contractaddress: string | null,
-  address?: string | null
+  address?: string | null,
+  action: "tokentx" | "txlist" | "txlistinternal" = "tokentx"
 ): Promise<EtherscanTransfer[]> {
-  const chainConfig: ChainConfig = chains[chain as keyof typeof chains];
-  const apikey = process.env[`${chain?.toUpperCase()}_ETHERSCAN_API_KEY`];
+  const parts = [chain, contractaddress, "address", address, action].filter(
+    Boolean
+  );
+  const key = parts.join(":");
 
-  if (!apikey) {
-    console.error("No API key found for", chainConfig.explorer_api);
-    console.error(
-      "Please set the API key in the .env file",
-      `${chain?.toUpperCase()}_ETHERSCAN_API_KEY`
-    );
-    throw new Error("API key not configured");
-  }
+  const refreshTransactions = async (
+    chain: string,
+    contractaddress: string | null,
+    address?: string | null,
+    action: "tokentx" | "txlist" | "txlistinternal" = "tokentx"
+  ): Promise<EtherscanTransfer[]> => {
+    console.log(">>> getTransactions", chain, contractaddress, address, action);
 
-  if (!chainConfig.explorer_api) {
-    throw new Error(`No explorer API found for chain ${chain}`);
-  }
+    const params = new URLSearchParams({
+      chain,
+      module: "account",
+      action,
+      startblock: "0",
+      endblock: "99999999",
+      sort: "desc",
+    });
 
-  const cacheKey = `${chain}:${contractaddress}:${address}`;
-  if (cache[cacheKey]) {
-    console.log(">>> cache hit", cacheKey);
-    return cache[cacheKey];
-  }
-  console.log(">>> getTransactions", chain, contractaddress, address);
+    // Add optional filters
+    if (address) {
+      params.set("address", address);
+    }
+    if (contractaddress && action === "tokentx") {
+      params.set("contractaddress", contractaddress);
+    }
 
-  const params = new URLSearchParams({
-    module: "account",
-    action: "tokentx",
-    startblock: "0",
-    endblock: "99999999",
-    sort: "desc",
-    apikey: apikey || "",
+    const apicall = `${
+      process.env.NEXT_PUBLIC_WEBAPP_URL
+    }/api/etherscan?${params.toString()}`;
+    console.log(">>> getTransactions: apicall", apicall);
+    const response = await fetch(apicall);
+    const data = await response.json();
+
+    if (data.status === "1") {
+      cache.set(key, data.result, { version: 1 });
+      return data.result;
+    } else {
+      console.log(">>> getTransactions: no data", key, data);
+      return [];
+    }
+  };
+
+  const cachedObject = await cache.get<EtherscanTransfer[]>(key, {
+    ttl: 1000 * 60 * 60, // 1 hour
+    gracePeriod: 1000 * 60 * 60 * 24, // 1 day
+    refresh: () => refreshTransactions(chain, contractaddress, address, action),
   });
 
-  // Add optional filters
-  if (address) {
-    params.set("address", address);
-  }
-  if (contractaddress) {
-    params.set("contractaddress", contractaddress);
-  }
-
-  const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
-  console.log(">>> apicall", apicall);
-  const response = await fetch(apicall);
-  const data = await response.json();
-  if (data.status === "1") {
-    cache[cacheKey] = data.result;
-    return data.result;
-  }
-  if (data.status === "0") {
-    console.error(">>> error fetching transactions", data.message);
-    return data.result;
-  }
-  console.error(">>> error fetching transactions", data);
-  throw new Error(
-    `Failed to fetch transactions for ${chain}:${contractaddress}:${address}`
-  );
+  return cachedObject || [];
 }

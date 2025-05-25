@@ -69,7 +69,10 @@ type ResponseData = {
   };
 };
 
-const getOpenCollectiveData = async (collectiveSlug: string, limit: number) => {
+const getOpenCollectiveData = async (
+  collectiveSlug: string,
+  { limit, fromDate, toDate }: { limit: number; fromDate?: Date; toDate?: Date }
+) => {
   if (!collectiveSlug) throw new Error("Missing collectiveSlug");
   if (!process.env.NEXT_PUBLIC_OC_GRAPHQL_API) {
     throw new Error("Missing OC_GRAPHQL_API env variable");
@@ -83,15 +86,29 @@ const getOpenCollectiveData = async (collectiveSlug: string, limit: number) => {
   const graphQLClient = new GraphQLClient(
     process.env.NEXT_PUBLIC_OC_GRAPHQL_API,
     {
-      // @ts-expect-error AbortSignal is not typed
-      signal: controller.signal,
+      signal: controller.signal as AbortSignal,
     }
   );
   try {
-    const data: ResponseData = await graphQLClient.request(query, {
+    type Vars = {
+      collectiveSlug: string;
+      limit?: number;
+      fromDate?: string;
+      toDate?: string;
+    };
+    const vars: Vars = {
       collectiveSlug: slug,
-      limit: limit || 5,
-    });
+    };
+    if (fromDate) {
+      vars.fromDate = fromDate.toISOString();
+    }
+    if (toDate) {
+      vars.toDate = toDate.toISOString();
+    }
+    if (!fromDate && !toDate) {
+      vars.limit = limit || 5;
+    }
+    const data: ResponseData = await graphQLClient.request(query, vars);
     const result = {
       currency: data.Collective.currency,
       amount: `${data.Collective.stats.balance}`,
@@ -110,14 +127,19 @@ const CollectiveExpenses = ({
   collectiveSlug,
   limit,
   showStatus,
+  fromDate,
+  toDate,
 }: {
   collectiveSlug: string;
   limit: number;
   showStatus: boolean;
+  fromDate?: Date;
+  toDate?: Date;
 }) => {
   const { data, error } = useSWR(
     collectiveSlug,
-    (collectiveSlug) => getOpenCollectiveData(collectiveSlug, limit),
+    (collectiveSlug) =>
+      getOpenCollectiveData(collectiveSlug, { limit, fromDate, toDate }),
     {
       revalidateOnFocus: true,
       dedupingInterval: 60000, // 1 minute
@@ -133,15 +155,16 @@ const CollectiveExpenses = ({
 
   if (error) return <div>An error has occurred: {error.message}.</div>;
   if (!data) return <div className="text-center">Loading...</div>;
+  const expenses = limit ? data.expenses.slice(0, limit) : data.expenses;
   return (
     <div>
-      <ul className="list-none m-3">
-        {data.expenses.map((expense) => (
-          <li
+      <div className="grid gap-0">
+        {expenses.map((expense) => (
+          <div
             key={expense.id}
-            className="flex flex-row my-2 items-center px-4 py-2 border-b border-gray-200 dark:border-gray-800 justify-between font-bold"
+            className="grid grid-cols-6 gap-2  my-2 items-center px-4 py-2 border-b border-gray-200 dark:border-gray-800 justify-between font-bold"
           >
-            <div className="mr-2 text-left">
+            <div className="mr-2 text-left col-span-4">
               <a
                 href={`https://opencollective.com/${collectiveSlug}/expenses/${expense.id}`}
                 title="open expense on opencollective.com"
@@ -149,7 +172,7 @@ const CollectiveExpenses = ({
                 {expense.description}
               </a>
             </div>
-            <div className="text-right flex flex-row">
+            <div className="text-right flex flex-row justify-end">
               €
               <HumanNumber value={expense.amount / 100} />
             </div>
@@ -160,9 +183,9 @@ const CollectiveExpenses = ({
                 </div>
               </div>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

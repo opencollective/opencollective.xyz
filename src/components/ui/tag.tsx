@@ -18,12 +18,11 @@ function stringToColor(str: string): string {
 }
 
 export function Tag({ className, value, ...props }: TagProps) {
-  const [match, kind, val] = value.match(/^([a-z0-9_]+):(.*)$/i) || [];
-
+  const match = value.match(/^([a-z0-9_]+):(.*)$/i);
   if (!match) {
     return <SimpleTag value={value} className={className} {...props} />;
   }
-
+  const [, kind, val] = match;
   if (kind === "t") {
     return <SimpleTag value={val} className={className} {...props} />;
   }

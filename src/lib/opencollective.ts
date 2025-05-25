@@ -93,8 +93,7 @@ export const getTransactions = async (
   const graphQLClient = new GraphQLClient(
     process.env.NEXT_PUBLIC_OC_GRAPHQL_API || "",
     {
-      // @ts-expect-error signal is not typed
-      signal: controller.signal,
+      signal: controller.signal as AbortSignal,
     }
   );
   try {
