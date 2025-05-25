@@ -657,9 +657,6 @@ export function computeTokenStats(
     }
 
     acc[tokenKey].stats.all.count += 1;
-    if (acc[tokenKey].stats.all.value !== undefined) {
-      acc[tokenKey].stats.all.value += amount;
-    }
     return acc;
   }, {} as Record<string, TokenStats>);
 }

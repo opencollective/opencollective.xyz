@@ -1,4 +1,3 @@
-// app/api/og/route.tsx
 import { getCollectiveConfig, getWalletAddresses } from "@/lib/config";
 import { getURIFromNostrEvent, subscribeToNotesByURI } from "@/lib/nostr";
 import { getTransactionsForCollective } from "@/lib/transactions";
@@ -10,9 +9,11 @@ import { NostrEvent } from "nostr-tools";
 
 export const runtime = "nodejs";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const collectiveSlug = searchParams.get("collectiveSlug");
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ collectiveSlug: string }> }
+) {
+  const { collectiveSlug } = await params;
   const collectiveConfig = getCollectiveConfig(collectiveSlug as string);
 
   const transactions = await getTransactionsForCollective(

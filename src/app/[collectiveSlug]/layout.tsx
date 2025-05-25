@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     collectiveConfig?.profile?.about || "Open Source Organization";
   const ogImageUrl = `${
     process.env.NEXT_PUBLIC_WEBAPP_URL
-  }/api/og?collectiveSlug=${encodeURIComponent(collectiveSlug)}`;
+  }/${collectiveSlug}/ogimage.png?t=${new Date().toISOString().split("T")[0]}`;
 
   return {
     title,

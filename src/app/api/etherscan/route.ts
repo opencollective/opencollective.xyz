@@ -1,13 +1,6 @@
 import { ChainConfig } from "@/types";
 import chains from "@/data/chains.json";
-
-type CachedObject = {
-  data: unknown;
-  timestamp: number;
-  version: number;
-};
-
-const cache: Record<string, CachedObject> = {};
+import { cache } from "@/utils/cache";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -44,61 +37,54 @@ export async function GET(req: Request) {
   }
 
   const key = `${chain}:${contractaddress}:${address}:${action}`;
-  const cached = cache[key];
-  if (
-    cached &&
-    cached.timestamp > Date.now() - 1000 * 60 * 60 &&
-    cached.version === 1
-  ) {
-    console.log("/api/etherscan: cache hit", key);
-    return Response.json(cached.data, {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
-      },
-    });
-  }
 
-  const params = new URLSearchParams({
-    module: "account",
-    action,
-    startblock: "0",
-    endblock: "99999999",
-    sort: "desc",
-    apikey,
+  const cached = await cache.get(key, {
+    refresh: async () => {
+      const params = new URLSearchParams({
+        module: "account",
+        action,
+        startblock: "0",
+        endblock: "99999999",
+        sort: "desc",
+        apikey,
+      });
+
+      if (address) {
+        params.set("address", address);
+      }
+      if (contractaddress && action === "tokentx") {
+        params.set("contractaddress", contractaddress);
+      }
+
+      const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
+      try {
+        console.log("/api/etherscan: apicall", apicall);
+        const response = await fetch(apicall);
+        const data = await response.json();
+        if (data.status === "1") {
+          console.log("/api/etherscan: writing cache", key);
+          return data;
+        } else {
+          return { error: data.result };
+        }
+      } catch (e) {
+        console.error(`API call failed: ${apicall}`, e);
+        return { error: `Failed to fetch transactions` };
+      }
+    },
   });
 
-  if (address) {
-    params.set("address", address);
-  }
-  if (contractaddress && action === "tokentx") {
-    params.set("contractaddress", contractaddress);
-  }
-
-  const apicall = `${chainConfig.explorer_api}/api?${params.toString()}`;
-  try {
-    console.log("/api/etherscan: apicall", apicall);
-    const response = await fetch(apicall);
-    const data = await response.json();
-    if (data.status === "1") {
-      console.log("/api/etherscan: writing cache", key);
-      cache[key] = {
-        data,
-        timestamp: Date.now(),
-        version: 1,
-      };
-    }
-    return Response.json(data, {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
-      },
-    });
-  } catch (e) {
-    console.error(`API call failed: ${apicall}`, e);
+  if (cached?.error) {
     return Response.json(
-      { error: `Failed to fetch transactions` },
+      { error: `Failed to fetch transactions: ${cached.error}` },
       { status: 500 }
     );
   }
+
+  return Response.json(cached, {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
+    },
+  });
 }

@@ -86,13 +86,12 @@ class Cache {
         typeof value === "bigint" ? value.toString() : value
       );
       const compressed = this.compressData(jsonString);
-      const ratio = this.getCompressionRatio(jsonString, compressed);
-
-      console.log(
-        `Cache set ${key}: ${ratio.originalSize} -> ${
-          ratio.compressedSize
-        } bytes (${ratio.ratio.toFixed(2)}%)`
-      );
+      // const ratio = this.getCompressionRatio(jsonString, compressed);
+      // console.log(
+      //   `Cache set ${key}: ${ratio.originalSize} -> ${
+      //     ratio.compressedSize
+      //   } bytes (${ratio.ratio.toFixed(2)}%)`
+      // );
 
       this.storage.setItem(key, compressed);
     } catch (err) {
@@ -108,67 +107,96 @@ class Cache {
     }
   }
 
-  public get<T>(key: string, options: CacheOptions<T> = {}): T | null {
+  /**
+   * Returns cached data for the given key, or refreshes the cache if it is miss or stale.
+   * If the cache is hit and fresh, it returns the cached data directly.
+   * If the cache is stale but within grace period, it returns stale data immediately and triggers background refresh.
+   * If the cache is stale and beyond grace period, it refreshes the data and returns a promise.
+   * If the cache is miss, it refreshes the data and returns a promise (or null if no refresh function).
+   *
+   * If multiple refresh requests are made for the same key, the first request will refresh the cache and all other requests will wait for the refresh to complete.
+   */
+  public get<T>(key: string, options: CacheOptions<T> = {}): Promise<T | null> {
+    const cacheMiss = (): Promise<T | null> => {
+      if (!options.refresh) {
+        return Promise.resolve(null);
+      }
+      if (!this.ongoingRefreshes.has(key)) {
+        const refreshPromise = options
+          .refresh?.()
+          .then((data: T) => {
+            this.set(key, data, {
+              version: options.version || this.currentVersion,
+              ttl: options.ttl,
+              gracePeriod: options.gracePeriod,
+            });
+            return Promise.resolve(data);
+          })
+          .finally(() => {
+            // Clean up the ongoing refresh entry
+            this.ongoingRefreshes.delete(key);
+          });
+
+        // Store the refresh promise
+        this.ongoingRefreshes.set(key, refreshPromise);
+        return refreshPromise as Promise<T>;
+      } else {
+        return this.ongoingRefreshes.get(key) as Promise<T>;
+      }
+    };
+
     try {
       const compressed = this.storage.getItem(key);
-      if (!compressed) return null;
+      if (!compressed) return cacheMiss();
 
       const jsonString = this.decompressData(compressed);
       const cachedObject: CachedObject<T> = JSON.parse(jsonString);
 
       // Check version
       if (options.version && cachedObject.version !== options.version) {
-        console.log(
-          `Cache version mismatch for ${key}: expected ${options.version}, got ${cachedObject.version}`
-        );
         this.remove(key);
-        return null;
+        return cacheMiss();
       }
 
-      if (
-        options.refresh &&
-        options.ttl &&
-        options.gracePeriod &&
-        Date.now() - cachedObject.timestamp > options.ttl + options.gracePeriod
-      ) {
-        // Check if there's already a refresh in progress
-        if (!this.ongoingRefreshes.has(key)) {
-          const refreshPromise = options
-            .refresh()
-            .then((data: T) => {
-              this.set(key, data, {
-                version: cachedObject.version,
-                ttl: options.ttl,
-                gracePeriod: options.gracePeriod,
-              });
-              return data;
-            })
-            .finally(() => {
-              // Clean up the ongoing refresh entry
-              this.ongoingRefreshes.delete(key);
-            });
-
-          // Store the refresh promise
-          this.ongoingRefreshes.set(key, refreshPromise);
-        }
-        return cachedObject.data;
-      }
+      const age = Date.now() - cachedObject.timestamp;
 
       // Check TTL
-      if (options.ttl && Date.now() - cachedObject.timestamp > options.ttl) {
-        console.log(
-          `Cache expired for ${key}: ${
-            (Date.now() - cachedObject.timestamp) / 1000
-          }s old`
-        );
-        this.remove(key);
-        return null;
+      if (options.ttl && age > options.ttl) {
+        // Data is stale
+        if (options.gracePeriod && age <= options.ttl + options.gracePeriod) {
+          // Within grace period - return stale data immediately and trigger background refresh
+          if (options.refresh && !this.ongoingRefreshes.has(key)) {
+            const refreshPromise = options
+              .refresh()
+              .then((data: T) => {
+                this.set(key, data, {
+                  version: options.version || this.currentVersion,
+                  ttl: options.ttl,
+                  gracePeriod: options.gracePeriod,
+                });
+                return Promise.resolve(data);
+              })
+              .finally(() => {
+                // Clean up the ongoing refresh entry
+                this.ongoingRefreshes.delete(key);
+              });
+
+            // Store the refresh promise
+            this.ongoingRefreshes.set(key, refreshPromise);
+          }
+          return Promise.resolve(cachedObject.data); // Return stale data immediately
+        } else {
+          // Beyond grace period - remove stale data and refresh
+          this.remove(key);
+          return cacheMiss();
+        }
       }
 
-      return cachedObject.data;
+      // Data is fresh
+      return Promise.resolve(cachedObject.data);
     } catch (err) {
       console.error("Error getting cache:", err, "key:", key);
-      return null;
+      return cacheMiss();
     }
   }
 
@@ -178,6 +206,7 @@ class Cache {
 
   public clear(): void {
     this.storage.clear();
+    this.ongoingRefreshes.clear();
   }
 
   public setVersion(version: number): void {
