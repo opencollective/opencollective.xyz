@@ -88,7 +88,10 @@ export async function GET(
       }
       return false;
     })
-    .slice(0, 10);
+    .slice(0, inboundLeaderboard.length > 10 ? 9 : 10);
+
+  const remainingContributors =
+    inboundLeaderboard.length > 10 ? inboundLeaderboard.length - 9 : 0;
 
   // Reset avatarsUsed for core contributors
   const coreContributorsAvatarsUsed: Record<string, boolean> = {};
@@ -107,7 +110,10 @@ export async function GET(
       }
       return false;
     })
-    .slice(0, 10);
+    .slice(0, outboundLeaderboard.length > 10 ? 9 : 10);
+
+  const remainingCoreContributors =
+    outboundLeaderboard.length > 10 ? outboundLeaderboard.length - 9 : 0;
 
   return new ImageResponse(
     (
@@ -170,7 +176,7 @@ export async function GET(
           <h1
             style={{
               fontSize: 52,
-              fontWeight: "bold",
+              fontWeight: 900,
               margin: 0,
               color: "#ffffff",
             }}
@@ -267,6 +273,25 @@ export async function GET(
                   />
                 );
               })}
+              {remainingCoreContributors > 0 && (
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    border: "3px solid rgba(255, 255, 255, 0.3)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    color: "#ffffff",
+                  }}
+                >
+                  +{remainingCoreContributors}
+                </div>
+              )}
             </div>
           </div>
 
@@ -331,6 +356,25 @@ export async function GET(
                   />
                 );
               })}
+              {remainingContributors > 0 && (
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    border: "3px solid rgba(255, 255, 255, 0.3)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    color: "#ffffff",
+                  }}
+                >
+                  +{remainingContributors}
+                </div>
+              )}
             </div>
           </div>
         </div>
