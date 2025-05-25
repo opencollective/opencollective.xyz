@@ -202,7 +202,6 @@ function emojiToCodePoint(emoji: string): string {
 // Fetch Twemoji SVG content
 async function fetchTwemojiSvg(emoji: string): Promise<string> {
   const codePoint = emojiToCodePoint(emoji);
-  console.log(">>> codePoint", codePoint);
   const url = `https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${codePoint}.svg`;
 
   try {
@@ -211,7 +210,6 @@ async function fetchTwemojiSvg(emoji: string): Promise<string> {
       throw new Error(`Failed to fetch emoji: ${response.status}`);
     }
     const text = await response.text();
-    console.log(">>> text", text);
     return text;
   } catch (error) {
     console.error("Failed to fetch Twemoji:", error);

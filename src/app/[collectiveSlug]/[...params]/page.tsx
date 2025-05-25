@@ -22,8 +22,6 @@ export default async function CollectivePage({
 }) {
   const urlParams = await params;
   const queryParams = await searchParams;
-  console.log(">>> url params", urlParams);
-  console.log(">>> query params", queryParams);
   const collectiveSlug = urlParams.collectiveSlug;
   const pageParams: PageParams = {
     collectiveSlug,
