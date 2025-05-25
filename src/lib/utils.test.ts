@@ -2,7 +2,6 @@ import {
   computeTokenStats,
   getTotalsByTokenType,
   getLeaderboard,
-  generateURI,
   getPrimaryToken,
 } from "./utils";
 import { Transaction, WalletConfig, Address, TxHash, Token } from "@/types";

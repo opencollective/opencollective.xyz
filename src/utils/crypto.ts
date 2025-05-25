@@ -22,7 +22,7 @@ export const getBlockTimestamp = async (
   provider: JsonRpcProvider
 ) => {
   const key = `${chain}:${blockNumber}`;
-  const cached = cache.get<number>(key);
+  const cached = await cache.get<number>(key);
   if (cached !== null) {
     return cached;
   }
@@ -42,12 +42,7 @@ export async function getTokenDetails(
 ): Promise<Token | null> {
   try {
     const key = `${chain}:${contractAddress}`;
-    const cached = cache.get<{
-      name: string;
-      symbol: string;
-      decimals: number;
-      address: string;
-    }>(key);
+    const cached = await cache.get<Token>(key);
 
     if (cached) {
       return cached as Token;
@@ -84,7 +79,7 @@ export async function getTokenDetails(
       symbol: "???",
       decimals: 18,
       address: contractAddress as Address,
-    };
+    } as Token;
   }
 }
 
@@ -147,7 +142,7 @@ export async function getAddressType(
   provider: JsonRpcProvider
 ): Promise<"eoa" | "contract" | "token" | undefined> {
   const key = `${chain}:${address}:type`;
-  const cached = cache.get<"eoa" | "contract" | "token">(key);
+  const cached = await cache.get<"eoa" | "contract" | "token">(key);
   if (cached) {
     return cached;
   }
@@ -210,8 +205,9 @@ export async function getTxDetails(
   const tx = await provider.getTransaction(tx_hash);
   if (!tx?.to) return null;
 
-  if (cache.get(tx.hash)) {
-    return cache.get(tx.hash);
+  const cached = await cache.get<TxDetails>(tx.hash);
+  if (cached) {
+    return cached;
   }
 
   const contract = new ethers.Contract(tx.to, ERC20_ABI, provider);
@@ -341,7 +337,7 @@ export async function getBlockRange(
 ): Promise<Transaction[]> {
   const key =
     `${chain}:${accountAddress}[${fromBlock}-${toBlock}]`.toLowerCase();
-  const cached = cache.get<Transaction[]>(key);
+  const cached = await cache.get<Transaction[]>(key);
   if (cached) {
     return cached;
   }
@@ -480,7 +476,7 @@ export async function getTransactionsFromEtherscan(
 ): Promise<null | Transaction[]> {
   const key_parts = [chain, tokenAddress, address];
   const key = key_parts.filter(Boolean).join(":");
-  const cached = cache.get<Transaction[]>(key);
+  const cached = await cache.get<Transaction[]>(key);
   if (cached) {
     return cached;
   }
