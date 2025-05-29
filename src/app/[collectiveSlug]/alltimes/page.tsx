@@ -34,6 +34,7 @@ export default async function CollectivePage({
               tokenType="token"
               size="large"
               direction="outbound"
+              limit={64}
               transactions={filterTransactions(
                 transactions,
                 "token",

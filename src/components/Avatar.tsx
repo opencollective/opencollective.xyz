@@ -11,37 +11,10 @@ import {
 } from "@/lib/utils";
 import { Address, ProfileData, URI } from "@/types";
 import { cn } from "@/lib/utils";
-import { NostrNote, useNostr } from "@/providers/NostrProvider";
+import { useNostr, getProfileFromNotes } from "@/providers/NostrProvider";
 import { useRouter } from "next/navigation";
 import { getENSDetailsFromAddress } from "@/utils/crypto.server";
 import { useEffect, useState } from "react";
-
-const getProfileFromNotes = (uri: URI, notes: NostrNote[]): ProfileData => {
-  if (!uri) throw new Error("getProfileFromNotes:URI is required");
-  const address = getAddressFromURI(uri);
-  const defaultProfile = {
-    uri,
-    address: address || undefined,
-    name: "",
-    about: "",
-    picture: "",
-    website: "",
-  };
-  if (!address) return defaultProfile;
-  if (!notes || notes.length === 0) return defaultProfile;
-  const profileNote = notes[0];
-  if (profileNote) {
-    return {
-      uri,
-      address: address,
-      name: profileNote.content || "",
-      about: profileNote.tags.find((t) => t[0] === "about")?.[1] || "",
-      picture: profileNote.tags.find((t) => t[0] === "picture")?.[1] || "",
-      website: profileNote.tags.find((t) => t[0] === "website")?.[1] || "",
-    };
-  }
-  return defaultProfile;
-};
 
 export default function Avatar({
   uri,

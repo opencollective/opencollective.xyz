@@ -15,7 +15,7 @@ import Link from "next/link";
 import { ProfileData, URI } from "@/types";
 import { generateURI, getAddressFromURI, getChainIdFromURI } from "@/lib/utils";
 import { useNostr } from "@/providers/NostrProvider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import chains from "@/data/chains.json";
 
 export default function NostrEditProfileModal({
@@ -50,6 +50,20 @@ export default function NostrEditProfileModal({
       about: "",
     }
   );
+
+  // Update profileData whenever the profile prop changes
+  useEffect(() => {
+    setProfileData(
+      profile || {
+        uri,
+        address,
+        name: "",
+        picture: "",
+        website: "",
+        about: "",
+      }
+    );
+  }, [profile, uri, address]);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +132,7 @@ export default function NostrEditProfileModal({
               </Label>
               <Input
                 id="name"
-                defaultValue={profileData.name}
+                defaultValue={profileData.name || ""}
                 onChange={(e) =>
                   setProfileData({ ...profileData, name: e.target.value })
                 }
@@ -132,7 +146,7 @@ export default function NostrEditProfileModal({
               </Label>
               <Input
                 id="website"
-                defaultValue={profileData.website}
+                defaultValue={profileData.website || ""}
                 onChange={(e) =>
                   setProfileData({ ...profileData, website: e.target.value })
                 }
@@ -146,7 +160,7 @@ export default function NostrEditProfileModal({
               </Label>
               <Input
                 id="picture"
-                defaultValue={profileData.picture}
+                defaultValue={profileData.picture || ""}
                 onChange={(e) =>
                   setProfileData({ ...profileData, picture: e.target.value })
                 }
@@ -161,7 +175,7 @@ export default function NostrEditProfileModal({
               </Label>
               <Textarea
                 id="about"
-                defaultValue={profileData.about}
+                defaultValue={profileData.about || ""}
                 onChange={(e) =>
                   setProfileData({ ...profileData, about: e.target.value })
                 }
