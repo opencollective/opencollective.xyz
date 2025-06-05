@@ -25,6 +25,7 @@ import { insertEventIntoDescendingList } from "nostr-tools/utils";
 import { NostrUserBox } from "@/components/NostrUserBox";
 import NostrEditProfileModal from "@/components/NostrEditProfileModal";
 import type { ProfileData, URI } from "@/types";
+import { getAddressFromURI } from "@/lib/utils";
 
 export type NostrNote = {
   id: string;
@@ -491,7 +492,6 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
       publishMetadata,
     }),
     [
-      poolRef.current,
       notesByURI,
       latestNotes,
       subscribeToNotesByURI,
@@ -566,6 +566,36 @@ export const useNotes = (URIs: URI[]) => {
   return {
     notes: context.notesByURI,
   };
+};
+
+export const getProfileFromNotes = (
+  uri: URI,
+  notes: NostrNote[]
+): ProfileData => {
+  if (!uri) throw new Error("getProfileFromNotes:URI is required");
+  const address = getAddressFromURI(uri);
+  const defaultProfile = {
+    uri,
+    address: address || undefined,
+    name: "",
+    about: "",
+    picture: "",
+    website: "",
+  };
+  if (!address) return defaultProfile;
+  if (!notes || notes.length === 0) return defaultProfile;
+  const profileNote = notes[0];
+  if (profileNote) {
+    return {
+      uri,
+      address: address,
+      name: profileNote.content || "",
+      about: profileNote.tags.find((t) => t[0] === "about")?.[1] || "",
+      picture: profileNote.tags.find((t) => t[0] === "picture")?.[1] || "",
+      website: profileNote.tags.find((t) => t[0] === "website")?.[1] || "",
+    };
+  }
+  return defaultProfile;
 };
 
 export const useNostr = () => {

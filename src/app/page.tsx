@@ -91,22 +91,6 @@ export default function Home() {
         </a>
         <a
           className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://gitcoin.opencollective.xyz"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            className="dark:invert"
-            aria-hidden
-            src="/gitcoin.svg"
-            alt="Gitcoin icon"
-            width={16}
-            height={16}
-          />
-          Gitcoin
-        </a>
-        <a
-          className="invert-25 hover:invert-0 flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="nostr:npub1hsr6x2zhw3y6zzndcfel0xwcckkhf05w2ghnulelsppcruq4c3qqzv5whg"
           target="_blank"
           rel="noopener noreferrer"

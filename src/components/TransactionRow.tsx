@@ -103,12 +103,12 @@ export function TransactionRow({ tx, collectiveSlug }: TransactionRowProps) {
         <div className="relative">
           <Avatar
             uri={fromURI}
-            editable={false}
+            editable={true}
             defaultProfile={defaultFromProfile}
           />
           <Avatar
             uri={toURI}
-            editable={false}
+            editable={true}
             defaultProfile={defaultToProfile}
             className="absolute -bottom-2 -right-2 h-8 w-8 border-2 border-gray-300 bg-white"
           />

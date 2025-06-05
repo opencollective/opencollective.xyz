@@ -9,7 +9,7 @@ import {
   LeaderboardEntry,
   formatAmount,
 } from "@/lib/utils";
-import { useNostr } from "@/providers/NostrProvider";
+import { getProfileFromNotes, useNostr } from "@/providers/NostrProvider";
 import { TokenType, Transaction, TransactionDirection, URI } from "@/types";
 import Avatar from "./Avatar";
 import { useMemo } from "react";
@@ -56,7 +56,7 @@ export default function LeaderboardComponent({
     );
   });
 
-  const { subscribeToNotesByURI } = useNostr();
+  const { subscribeToNotesByURI, notesByURI } = useNostr();
 
   const leaderboard: Leaderboard | null = useMemo(
     () => getLeaderboard(transactions, "USD", direction),
@@ -67,6 +67,13 @@ export default function LeaderboardComponent({
   }
 
   subscribeToNotesByURI(addressURIs);
+
+  const profilesByURI = Object.fromEntries(
+    Object.entries(notesByURI).map(([uri, note]) => [
+      uri,
+      getProfileFromNotes(uri as URI, note),
+    ])
+  );
 
   const leaderboardEntries = limit ? leaderboard.slice(0, limit) : leaderboard;
 
@@ -86,7 +93,9 @@ export default function LeaderboardComponent({
             <div key={uri} className="flex flex-col items-center text-center ">
               <Avatar
                 uri={uri}
-                title={`Address: ${truncateAddress(address)}\n\nTransactions: ${
+                title={`${
+                  profilesByURI[entry.uri]?.name || ""
+                }\n\nAddress: ${truncateAddress(address)}\n\nTransactions: ${
                   entry.stats.all.count
                 }${
                   direction === "outbound"
