@@ -359,13 +359,13 @@ export function NostrProvider({ children }: { children: React.ReactNode }) {
         if (subscribedURIs.current[uri] === undefined) {
           newURIs.push(uri);
           const groupIndex = getSubscriptionGroup(uri);
-          console.log(
-            ">>> NostrProvider subscribeToNotesByURI: newURI",
-            uri,
-            "groupIndex",
-            groupIndex
-          );
-          subscribedURIs.current[uri] = getSubscriptionGroup(uri);
+          // console.log(
+          //   ">>> NostrProvider subscribeToNotesByURI: newURI",
+          //   uri,
+          //   "groupIndex",
+          //   groupIndex
+          // );
+          subscribedURIs.current[uri] = groupIndex;
           subscriptionGroupsToUpdate.add(subscribedURIs.current[uri]);
         }
       });

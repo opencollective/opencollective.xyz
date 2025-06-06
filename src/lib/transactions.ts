@@ -68,7 +68,6 @@ export const getTransactionsForCollective = async (
   };
 
   const tokens = [];
-  console.log(">>> collectiveConfig.tokens", collectiveConfig.tokens);
   await Promise.all(
     collectiveConfig.tokens?.map(async (token) => {
       const txs = await getTransactions(token.chain, token.address as Address);

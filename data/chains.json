@@ -5,10 +5,12 @@
     "explorer_name": "Etherscan",
     "explorer_api": "https://api.etherscan.io",
     "rpc": [
-      "https://eth.meowrpc.com",
+      "https://eth-mainnet.public.blastapi.io",
+      "https://eth.llamarpc.com",
       "https://eth.drpc.org",
       "https://core.gashawk.io/rpc",
       "https://uk.rpc.blxrbdn.com",
+      "https://eth.meowrpc.com",
       "https://rpc.ankr.com/eth",
       "https://rpc.eth.gateway.fm"
     ]

@@ -78,15 +78,21 @@ export async function GET(
   const avatarsUsed: Record<string, boolean> = {};
 
   const contributorsToShow = inboundLeaderboard
+    .sort((a, b) => {
+      const aHasPicture = profileByURI[a.uri as URI]?.picture;
+      const bHasPicture = profileByURI[b.uri as URI]?.picture;
+
+      // Prioritize entries with pictures
+      if (aHasPicture && !bHasPicture) return -1;
+      if (!aHasPicture && bHasPicture) return 1;
+      return 0;
+    })
     .filter((entry) => {
-      if (
-        profileByURI[entry.uri as URI]?.picture &&
-        !avatarsUsed[profileByURI[entry.uri as URI]?.picture || ""]
-      ) {
-        avatarsUsed[profileByURI[entry.uri as URI]?.picture || ""] = true;
-        return true;
+      const picture = profileByURI[entry.uri as URI]?.picture;
+      if (picture && !avatarsUsed[picture]) {
+        avatarsUsed[picture] = true;
       }
-      return false;
+      return true; // Don't exclude any entries
     })
     .slice(0, inboundLeaderboard.length > 10 ? 9 : 10);
 
@@ -96,19 +102,21 @@ export async function GET(
   // Reset avatarsUsed for core contributors
   const coreContributorsAvatarsUsed: Record<string, boolean> = {};
   const coreContributorsToShow = outboundLeaderboard
+    .sort((a, b) => {
+      const aHasPicture = profileByURI[a.uri as URI]?.picture;
+      const bHasPicture = profileByURI[b.uri as URI]?.picture;
+
+      // Prioritize entries with pictures
+      if (aHasPicture && !bHasPicture) return -1;
+      if (!aHasPicture && bHasPicture) return 1;
+      return 0;
+    })
     .filter((entry) => {
-      if (
-        profileByURI[entry.uri as URI]?.picture &&
-        !coreContributorsAvatarsUsed[
-          profileByURI[entry.uri as URI]?.picture || ""
-        ]
-      ) {
-        coreContributorsAvatarsUsed[
-          profileByURI[entry.uri as URI]?.picture || ""
-        ] = true;
-        return true;
+      const picture = profileByURI[entry.uri as URI]?.picture;
+      if (picture && !coreContributorsAvatarsUsed[picture]) {
+        coreContributorsAvatarsUsed[picture] = true;
       }
-      return false;
+      return true; // Don't exclude any entries
     })
     .slice(0, outboundLeaderboard.length > 10 ? 9 : 10);
 
@@ -126,7 +134,7 @@ export async function GET(
           display: "flex",
           flexDirection: "column",
           padding: "40px 40px 0px 40px",
-          gap: "30px",
+          gap: "20px",
           position: "relative",
           overflow: "hidden",
         }}
@@ -187,15 +195,18 @@ export async function GET(
 
         {/* Bio */}
         {collectiveConfig.profile?.about && (
-          <div style={{ display: "flex" }}>
+          <div
+            style={{
+              display: "flex",
+              height: "140px",
+            }}
+          >
             <p
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 lineHeight: 1.4,
                 color: "#cccccc",
                 margin: 0,
-                maxHeight: "84px",
-                overflow: "hidden",
               }}
             >
               {collectiveConfig.profile.about.split("\n")[0]}
@@ -209,7 +220,8 @@ export async function GET(
             display: "flex",
             flex: 1,
             gap: "40px",
-            marginTop: "60px",
+            height: "260px",
+            marginTop: "0px",
           }}
         >
           {/* Core Contributors */}
@@ -227,11 +239,10 @@ export async function GET(
             <div
               style={{
                 display: "flex",
-                fontSize: 32,
+                fontSize: 26,
                 fontWeight: "bold",
                 color: "#ffffff",
                 textTransform: "uppercase",
-                marginBottom: "10px",
               }}
             >
               Core Contributors
@@ -240,7 +251,8 @@ export async function GET(
               style={{
                 display: "flex",
                 flexWrap: "wrap",
-                height: "180px",
+                height: "170px",
+                marginTop: "0px",
                 gap: "15px",
                 alignItems: "center",
               }}
@@ -257,7 +269,7 @@ export async function GET(
                     )}`
                   : `${
                       process.env.NEXT_PUBLIC_WEBAPP_URL
-                    }/api/avatar?seed=${getAddressFromURI(entry.uri)}`;
+                    }/api/avatar.png?seed=${getAddressFromURI(entry.uri)}`;
 
                 return (
                   <img
@@ -268,7 +280,6 @@ export async function GET(
                     height={80}
                     style={{
                       borderRadius: "50%",
-                      border: "3px solid rgba(255, 255, 255, 0.3)",
                     }}
                   />
                 );
@@ -310,11 +321,10 @@ export async function GET(
             <div
               style={{
                 display: "flex",
-                fontSize: 32,
+                fontSize: 26,
                 fontWeight: "bold",
                 color: "#ffffff",
                 textTransform: "uppercase",
-                marginBottom: "10px",
               }}
             >
               Funded by
@@ -323,7 +333,8 @@ export async function GET(
               style={{
                 display: "flex",
                 flexWrap: "wrap",
-                height: "180px",
+                height: "170px",
+                marginTop: "0px",
                 gap: "15px",
                 alignItems: "center",
               }}
@@ -340,7 +351,7 @@ export async function GET(
                     )}`
                   : `${
                       process.env.NEXT_PUBLIC_WEBAPP_URL
-                    }/api/avatar?seed=${getAddressFromURI(entry.uri)}`;
+                    }/api/avatar.png?seed=${getAddressFromURI(entry.uri)}`;
 
                 return (
                   <img
@@ -351,7 +362,6 @@ export async function GET(
                     height={80}
                     style={{
                       borderRadius: "50%",
-                      border: "3px solid rgba(255, 255, 255, 0.3)",
                     }}
                   />
                 );
