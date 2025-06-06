@@ -74,6 +74,15 @@
         "website": "https://www.dorg.tech"
       },
       "primaryCurrency": "USD",
+      "tokens": [
+        {
+          "symbol": "dRep",
+          "chain": "ethereum",
+          "address": "0x885d7f09DbD93204C0dad95f5e226B0966e6fA9b",
+          "decimals": 18,
+          "imageUrl": "https://pbs.twimg.com/profile_images/1507802020853526534/J6FkV3-T_400x400.jpg"
+        }
+      ],
       "wallets": [
         {
           "type": "blockchain",
@@ -96,6 +105,14 @@
           "address": "0xdb22d2d37db92EA7fa6993C9f6Ead55FBb1eF4EA",
           "tokens": [
             "USDC"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "ethereum",
+          "address": "0x0000000000000000000000000000000000000000",
+          "tokens": [
+            "dRep"
           ]
         }
       ]

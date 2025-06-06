@@ -350,7 +350,7 @@ const normalizeAmount = (
 };
 
 const getTokenType = (tokenSymbol: string): TokenType => {
-  if (["CHT"].includes(tokenSymbol)) return "token";
+  if (["CHT", "dRep"].includes(tokenSymbol)) return "token";
   else return "fiat";
 };
 
@@ -547,8 +547,23 @@ export function getTotalsByTokenType(
 
   return transactions.reduce((acc, tx) => {
     const tokenType = getTokenType(tx.token.symbol || "");
-    const transactionDirection = getTransactionDirection(tx, walletAddresses);
-    if (!transactionDirection || transactionDirection === "all") return acc;
+    const transactionDirection = getTransactionDirection(
+      tx,
+      walletAddresses || [
+        "0x0000000000000000000000000000000000000000" as Address,
+      ]
+    );
+    if (!transactionDirection || transactionDirection === "all") {
+      console.log(
+        ">>> getTotalsByTokenType: skipping tx",
+        transactionDirection,
+        walletAddresses || [
+          "0x0000000000000000000000000000000000000000" as Address,
+        ],
+        tx
+      );
+      return acc;
+    }
     if (!acc[tokenType]) {
       acc[tokenType] = {
         inbound: 0,
@@ -589,6 +604,16 @@ export function getTransactionDirection(
     }
   } else if (addresses.includes(tx.from.toLowerCase())) {
     return "outbound";
+  } else if (getTokenType(tx.token.symbol || "") === "token") {
+    if (
+      tx.from.toLowerCase() === "0x0000000000000000000000000000000000000000"
+    ) {
+      return "outbound";
+    } else if (
+      tx.to.toLowerCase() === "0x0000000000000000000000000000000000000000"
+    ) {
+      return "inbound";
+    }
   }
 }
 /**

@@ -58,7 +58,6 @@ export default function SideSummary({
       ),
     [transactions, collectiveConfig.wallets, collectiveConfig.primaryCurrency]
   );
-  console.log(">>> totals", totals);
   if (!totals || (!totals["fiat"] && !totals["token"])) {
     return null;
   }
