@@ -46,7 +46,7 @@ export default function Product({ product }: ProductProps) {
         <CardTitle className="text-lg font-semibold line-clamp-2">
           {product.name}
         </CardTitle>
-        <CardDescription className="text-sm line-clamp-3">
+        <CardDescription className="text-sm line-clamp-3 min-h-14">
           {product.description}
         </CardDescription>
       </CardHeader>
@@ -72,9 +72,9 @@ export default function Product({ product }: ProductProps) {
                         : "border-muted hover:border-primary/50"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2">
-                        <div
+                        {/* <div
                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
                             selectedPriceIndex === index
                               ? "border-primary bg-primary"
@@ -84,7 +84,7 @@ export default function Product({ product }: ProductProps) {
                           {selectedPriceIndex === index && (
                             <div className="w-2 h-2 rounded-full bg-white" />
                           )}
-                        </div>
+                        </div> */}
                         <div>
                           <div className="font-medium">
                             {price.label ||
@@ -139,17 +139,6 @@ export default function Product({ product }: ProductProps) {
               </div>
             </div>
           )}
-
-          {(selectedPrice || singlePrice)?.tax &&
-            !(selectedPrice || singlePrice)!.tax!.included && (
-              <div className="text-xs text-muted-foreground text-center">
-                {formatPrice(
-                  (selectedPrice || singlePrice)!.tax!.amount,
-                  (selectedPrice || singlePrice)!.currency
-                )}{" "}
-                {(selectedPrice || singlePrice)!.tax!.label} not included
-              </div>
-            )}
         </div>
 
         <div className="mt-6">
