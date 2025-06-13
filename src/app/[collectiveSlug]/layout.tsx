@@ -1,5 +1,6 @@
 import { NostrProvider } from "@/providers/NostrProvider";
 import { getCollectiveConfig } from "@/lib/config";
+import ThemeProvider from "@/components/ThemeProvider";
 import type { Metadata } from "next";
 
 type Props = {
@@ -49,14 +50,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ collectiveSlug: string }>;
 }) {
+  const { collectiveSlug } = await params;
+  const collectiveConfig = getCollectiveConfig(collectiveSlug);
+
   return (
-    <div className="">
+    <ThemeProvider theme={collectiveConfig?.theme}>
       <NostrProvider>{children}</NostrProvider>
-    </div>
+    </ThemeProvider>
   );
 }

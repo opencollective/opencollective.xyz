@@ -1,5 +1,6 @@
 import { getCollectiveConfig } from "@/lib/config";
 import CollectivePageContent from "@/components/CollectivePageContent";
+import CollectivePageProducts from "@/components/CollectivePageProducts";
 import CollectivePageHeader from "@/components/CollectivePageHeader";
 
 export default async function CollectivePage({
@@ -17,6 +18,8 @@ export default async function CollectivePage({
   return (
     <div className="max-w-screen-lg mx-auto p-4 space-y-4">
       <CollectivePageHeader collectiveConfig={collectiveConfig} />
+
+      <CollectivePageProducts collectiveConfig={collectiveConfig} />
 
       <CollectivePageContent collectiveConfig={collectiveConfig} />
     </div>

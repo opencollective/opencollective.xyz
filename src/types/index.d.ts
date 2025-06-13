@@ -119,12 +119,40 @@ export type WalletConfig = {
   currency?: string;
 };
 
+export type Price = {
+  amount: number;
+  currency: FiatCurrencySymbol;
+  frequency?: "monthly" | "yearly";
+  label?: string;
+  discount?: number;
+  tax?: {
+    amount: number;
+    label: string;
+    included: boolean;
+  };
+  stripeLink: string;
+};
+
+export type Theme = {
+  primaryColor: string;
+  secondaryColor: string;
+};
+
+export type Product = {
+  name: string;
+  description: string;
+  website: string;
+  prices: Price[];
+};
+
 export type CollectiveConfig = {
   slug: string;
+  products: Product[];
   tokens?: Token[];
   wallets: WalletConfig[];
   primaryCurrency: FiatCurrencySymbol;
   profile: ProfileData;
+  theme?: Theme;
   ignoreTxs?: string[];
 };
 

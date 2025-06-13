@@ -239,6 +239,91 @@
         "about": "A common space to meet, dream and work. \nA common for the commons in Brussels",
         "website": "https://commonshub.brussels"
       },
+      "theme": {
+        "primaryColor": "#FF4C02",
+        "secondaryColor": "#1CB260"
+      },
+      "products": [
+        {
+          "name": "Membership",
+          "description": "Priority access and discounts to use our space and RSVP to our events.",
+          "prices": [
+            {
+              "amount": 1000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "stripeLink": "https://buy.stripe.com/00g9C7dFH8EI07eaEJ"
+            },
+            {
+              "amount": 10000,
+              "currency": "EUR",
+              "frequency": "yearly",
+              "stripeLink": "https://buy.stripe.com/5kA4hNbxz4os2fm3cl"
+            }
+          ]
+        },
+        {
+          "name": "Day pass",
+          "description": "Come work at the Commons Hub. Pass valid for 12 months.",
+          "website": "https://commonshub.brussels",
+          "prices": [
+            {
+              "amount": 2500,
+              "currency": "EUR",
+              "label": "1-day pass",
+              "tax": {
+                "amount": 434,
+                "label": "VAT",
+                "included": true
+              },
+              "stripeLink": "https://buy.stripe.com/6oE7tZbxzf36g6c148"
+            },
+            {
+              "amount": 22000,
+              "currency": "EUR",
+              "label": "10-day pass",
+              "discount": 3000,
+              "tax": {
+                "amount": 3818,
+                "label": "VAT",
+                "included": true
+              },
+              "stripeLink": "https://buy.stripe.com/14k9C7bxz8EI5ry8wI"
+            }
+          ]
+        },
+        {
+          "name": "Full access",
+          "description": "24/7 access to the space.",
+          "website": "https://commonshub.brussels",
+          "prices": [
+            {
+              "amount": 10000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "label": "Community focus",
+              "tax": {
+                "amount": 2100,
+                "label": "VAT",
+                "included": false
+              },
+              "stripeLink": "https://buy.stripe.com/7sI01xdFH1cgf288wG"
+            },
+            {
+              "amount": 25000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "label": "Work focus",
+              "tax": {
+                "amount": 4339,
+                "label": "VAT",
+                "included": false
+              },
+              "stripeLink": "https://buy.stripe.com/7sI01xdFH1cgf288wG"
+            }
+          ]
+        }
+      ],
       "primaryCurrency": "EUR",
       "tokens": [
         {

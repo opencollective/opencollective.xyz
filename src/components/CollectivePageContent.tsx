@@ -76,7 +76,10 @@ export default function CollectivePageContent({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-8">
-      <div className="mt-8 sm:mt-16">
+      <div className="mt-2 sm:mt-4">
+        <h2 className="text-xl sm:text-2xl font-bold mt-2 sm:mt-4 mb-8 sm:mb-8">
+          Our financials
+        </h2>
         <GlobalLeaderboard
           transactions={transactions}
           collectiveConfig={collectiveConfig}
