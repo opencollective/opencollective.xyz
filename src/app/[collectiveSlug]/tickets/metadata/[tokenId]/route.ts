@@ -19,10 +19,11 @@ const getTicketCardData = async (contractAddress: string, tokenId: string) => {
   try {
     const [ticketsLeft, expiry] = await contract.getTicketCardData(tokenId);
     console.log(">>> getTicketCardData", ticketsLeft, expiry);
+    const expiryDate = new Date(Number(expiry) * 1000);
     return {
-      ticketsLeft,
+      ticketsLeft: Number(ticketsLeft),
       ticketsTotal: 10,
-      expiry,
+      expiry: expiryDate.toISOString().split("T")[0],
     };
   } catch (error) {
     console.error(">>> getTicketCardData", tokenId, error);
