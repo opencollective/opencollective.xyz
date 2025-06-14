@@ -1,7 +1,7 @@
 // src/app/api/[collectiveSlug]/tickets/mint/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { ethers, isAddress } from "ethers";
-import MembershipCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/MembershipCards.json";
+import { isAddress } from "ethers";
+import { mint } from "@/lib/nft";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -30,21 +30,9 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Set up provider and signer (owner)
-  const provider = new ethers.JsonRpcProvider(process.env.BASE_SEPOLIA_RPC_URL);
-  const signer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY!, provider);
-
-  // Connect to the contract
-  const contract = new ethers.Contract(
-    contractAddress,
-    MembershipCardsAbi.abi,
-    signer
-  );
-
   try {
-    const tx = await contract.mint(recipientAddress);
-    await tx.wait();
-    return NextResponse.json({ success: true, txHash: tx.hash });
+    const txHash = await mint(contractAddress, recipientAddress);
+    return NextResponse.json({ success: true, txHash });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

@@ -7,12 +7,20 @@ async function getBase64FromImageUrl(
   imgSrc: string | null | undefined,
   maxWidth?: number,
   maxHeight?: number
-): Promise<{ base64: string; mimeType: string } | null> {
+): Promise<{ base64?: string; mimeType: string; svg?: string } | null> {
   if (!imgSrc) {
     return null;
   }
   try {
     const response = await fetch(imgSrc);
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+
+    // Handle SVG images differently
+    if (contentType.includes("svg")) {
+      const svgContent = await response.text();
+      return { svg: svgContent, mimeType: "image/svg+xml" };
+    }
+
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer as ArrayBuffer);
     console.log(
@@ -44,13 +52,20 @@ async function getBase64FromImageUrl(
     }
 
     const base64 = processedBuffer.toString("base64");
-    const mimeType = response.headers.get("content-type") || "image/jpeg";
-    return { base64, mimeType };
+    return { base64, mimeType: contentType };
   } catch (error) {
     console.error("Error fetching image:", error);
     return null;
   }
 }
+
+const formatDate = (date: number) => {
+  return new Date(Number(date) * 1000).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 export async function GET(
   request: Request,
@@ -62,17 +77,8 @@ export async function GET(
   // Get query parameters
   const url = new URL(request.url);
   const name = url.searchParams.get("name") || "Ticket";
-  const ticketsTotal = parseInt(url.searchParams.get("ticketsTotal") || "1");
-  const ticketsLeft = parseInt(url.searchParams.get("ticketsLeft") || "1");
-  const expiryDate =
-    url.searchParams.get("expiryDate") || new Date().toISOString();
-
-  // Format expiry date
-  const formattedExpiryDate = new Date(expiryDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const mintedAt = parseInt(url.searchParams.get("mintedAt") || "1");
+  const expiryDate = parseInt(url.searchParams.get("expiryDate") || "1");
 
   const primaryColor = collectiveConfig?.theme?.primaryColor || "#000000";
   const secondaryColor = collectiveConfig?.theme?.secondaryColor || "#000000";
@@ -136,16 +142,24 @@ export async function GET(
       }</text>
     </g>
 
-    ${
-      base64Logo
-        ? `<image
-      xlink:href="data:${base64Logo.mimeType};base64,${base64Logo.base64}"
-      x="76" y="60"
-      width="60" height="60"
-      clip-path="circle(50% at 50% 50%)"
-    />`
-        : ""
-    }
+     ${
+       base64Logo
+         ? base64Logo.mimeType.includes("svg")
+           ? `<g transform="translate(76, 60)" clip-path="circle(50% at 50% 50%)">
+${base64Logo.svg?.replace(
+  /<svg(.*)width="\d+".*height="\d+"(.*)>/,
+  '<svg$1width="60" height="60"$2>'
+)}
+         
+       </g>`
+           : `<image
+              xlink:href="data:${base64Logo.mimeType};base64,${base64Logo.base64}"
+              x="76" y="60"
+              width="60" height="60"
+              clip-path="circle(50% at 50% 50%)"
+            />`
+         : ""
+     }
 
     
     <rect x="0" y="148" width="212" height="30" fill="white" fill-opacity="0.8"/>
@@ -155,12 +169,16 @@ export async function GET(
     
     <g font-size="12" fill="#FFFFFF" font-weight="500" style="text-shadow: 0px 1px 3px rgba(0,0,0,0.5);">
       <text x="15" y="310" text-anchor="start">
-        <tspan>Tickets</tspan>
-        <tspan x="15" dy="1.4em" font-size="12" font-weight="bold">${ticketsLeft}/${ticketsTotal}</tspan>
+        <tspan>Member since</tspan>
+        <tspan x="15" dy="1.4em" font-size="12" font-weight="bold">${formatDate(
+          mintedAt
+        )}</tspan>
       </text>
       <text x="197" y="310" text-anchor="end">
         <tspan>Expiry</tspan>
-        <tspan x="197" dy="1.4em" font-size="12" font-weight="bold">${formattedExpiryDate}</tspan>
+        <tspan x="197" dy="1.4em" font-size="12" font-weight="bold">${formatDate(
+          expiryDate
+        )}</tspan>
       </text>
     </g>
     <rect x="0" y="0" width="212" height="336" fill="url(#glossEffect)" />

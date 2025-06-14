@@ -385,6 +385,154 @@
       ]
     },
     {
+      "slug": "test-commonshub",
+      "profile": {
+        "name": "Commons Hub Brussels",
+        "picture": "https://door.commonshub.brussels/commonshub-icon.svg",
+        "photo": "https://framerusercontent.com/images/JjqoWpNfM9TNhscudsUTXSHfM.jpeg?scale-down-to=1024",
+        "about": "A common space to meet, dream and work. \nA common for the commons in Brussels",
+        "website": "https://commonshub.brussels"
+      },
+      "theme": {
+        "primaryColor": "#FF4C02",
+        "secondaryColor": "#1CB260"
+      },
+      "membershipCardContractAddress": "0xD002Ac04F9A6fCD3b4e5f9cB050363dBF77e9b3d",
+      "products": [
+        {
+          "name": "Membership",
+          "description": "Priority access and discounts to use our space and RSVP to our events.",
+          "prices": [
+            {
+              "amount": 1000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "stripeLink": "https://buy.stripe.com/00g9C7dFH8EI07eaEJ"
+            },
+            {
+              "amount": 10000,
+              "currency": "EUR",
+              "frequency": "yearly",
+              "stripeLink": "https://buy.stripe.com/5kA4hNbxz4os2fm3cl"
+            }
+          ]
+        },
+        {
+          "name": "Day pass",
+          "description": "Come work at the Commons Hub. Pass valid for 12 months.",
+          "website": "https://commonshub.brussels",
+          "prices": [
+            {
+              "amount": 2500,
+              "currency": "EUR",
+              "label": "1-day pass",
+              "tax": {
+                "amount": 434,
+                "label": "VAT",
+                "included": true
+              },
+              "stripeLink": "https://buy.stripe.com/test_cNi3cvgyh7BI5468iN4Vy01"
+            },
+            {
+              "amount": 22000,
+              "currency": "EUR",
+              "label": "10-day pass",
+              "metadata": {
+                "tickets": 10
+              },
+              "discount": 3000,
+              "tax": {
+                "amount": 3818,
+                "label": "VAT",
+                "included": true
+              },
+              "stripeLink": "https://buy.stripe.com/test_6oUeVdci15tAgMO9mR4Vy02",
+              "nftAddress": "0x18733D604C2620e7523506B81689deC7040E002B"
+            }
+          ]
+        },
+        {
+          "name": "Full access",
+          "description": "24/7 access to the space. VAT not included.",
+          "website": "https://commonshub.brussels",
+          "prices": [
+            {
+              "amount": 10000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "label": "Community focus",
+              "tax": {
+                "amount": 2100,
+                "label": "VAT",
+                "included": false
+              },
+              "stripeLink": "https://buy.stripe.com/7sI01xdFH1cgf288wG"
+            },
+            {
+              "amount": 25000,
+              "currency": "EUR",
+              "frequency": "monthly",
+              "label": "Work focus",
+              "tax": {
+                "amount": 4339,
+                "label": "VAT",
+                "included": false
+              },
+              "stripeLink": "https://buy.stripe.com/7sI01xdFH1cgf288wG"
+            }
+          ]
+        }
+      ],
+      "primaryCurrency": "EUR",
+      "tokens": [
+        {
+          "symbol": "CHT",
+          "chain": "celo",
+          "address": "0x65dd32834927de9e57e72a3e2130a19f81c6371d",
+          "decimals": 6,
+          "imageUrl": "https://door.commonshub.brussels/commonshub-icon.svg"
+        }
+      ],
+      "ignoreTxs": [
+        "0x42262de0f79d40de757f8fd08afb1927d693b7f033ff6fc828c1d30d19dfefa3",
+        "0x1a93cfa2f712079e9ee4657ab22eb6f170dfbbd1d559991e759d364690008ffb"
+      ],
+      "wallets": [
+        {
+          "type": "blockchain",
+          "label": "citizenspring-monerium",
+          "chain": "gnosis",
+          "address": "0x6fDF0AaE33E313d9C98D2Aa19Bcd8EF777912CBf",
+          "tokens": [
+            "EURE"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "label": "fridge",
+          "chain": "gnosis",
+          "address": "0x8b120C5756b86dE2cdeBf53C08D8bDD36f897c03",
+          "tokens": [
+            "EURB"
+          ]
+        },
+        {
+          "type": "blockchain",
+          "chain": "celo",
+          "address": "0x0000000000000000000000000000000000000000",
+          "tokens": [
+            "CHT"
+          ]
+        },
+        {
+          "type": "opencollective",
+          "hostSlug": "citizenspring-asbl",
+          "collectiveSlug": "commonshub-brussels",
+          "currency": "EUR"
+        }
+      ]
+    },
+    {
       "slug": "regensunite",
       "profile": {
         "name": "Regens Unite",

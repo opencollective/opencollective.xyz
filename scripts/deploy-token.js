@@ -18,25 +18,18 @@ async function main() {
   console.log("Deployer's public key:", deployer.address);
 
   // Get the contract factory
-  const MembershipCards = await ethers.getContractFactory("MembershipCards");
+  const ERC20Token = await ethers.getContractFactory("ERC20Token");
 
   // Interactive input for deployment parameters
-  const collectiveSlug = await question("Enter collective slug: ");
   const name = await question("Enter token name: ");
   const symbol = await question("Enter token symbol: ");
-  const defaultTickets = parseInt(
-    await question("Enter default number of tickets: ")
-  );
-  const defaultExpiryDuration = 365 * 24 * 60 * 60; // 1 year in seconds
-  const baseURI = `${process.env.WEBSITE_URL}/${collectiveSlug}/tickets/metadata`;
+  const decimals = await question("Enter token decimals: ");
 
-  console.log("\nDeploying MembershipCards contract...");
+  console.log("\nDeploying ERC20Token contract...");
   console.log("Parameters:");
   console.log("- Name:", name);
   console.log("- Symbol:", symbol);
-  console.log("- Base URI:", baseURI);
-  console.log("- Default Tickets:", defaultTickets);
-  console.log("- Default Expiry Duration:", defaultExpiryDuration, "seconds");
+  console.log("- Decimals:", decimals);
 
   // Get the network to determine the Etherscan URL
   const network = await ethers.provider.getNetwork();
@@ -58,26 +51,22 @@ async function main() {
   }
 
   // Deploy the contract
-  const ticketCardsContract = await MembershipCards.deploy(
+  const tokenContract = await ERC20Token.deploy(
     name,
     symbol,
-    baseURI,
-    defaultTickets,
-    defaultExpiryDuration
+    decimals,
+    deployer.address
   );
 
   // Wait for deployment to finish
-  await ticketCardsContract.waitForDeployment();
+  await tokenContract.waitForDeployment();
 
   // Get the deployed contract address
-  const address = await ticketCardsContract.getAddress();
-  console.log(
-    "MembershipCards deployed to:",
-    `${etherscanUrl}/address/${address}`
-  );
+  const address = await tokenContract.getAddress();
+  console.log("ERC20Token deployed to:", `${etherscanUrl}/address/${address}`);
 
   // Get the deployment transaction
-  const deployTx = ticketCardsContract.deploymentTransaction();
+  const deployTx = tokenContract.deploymentTransaction();
   const txHash = deployTx.hash;
   console.log("Transaction hash:", txHash);
 
@@ -85,20 +74,14 @@ async function main() {
 
   // Wait for a few block confirmations before verifying
   console.log("Waiting for block confirmations...");
-  await ticketCardsContract.deploymentTransaction().wait(5);
+  await tokenContract.deploymentTransaction().wait(5);
 
   // Verify the contract on Etherscan
   console.log("Verifying contract on Etherscan...");
   try {
     await hre.run("verify:verify", {
       address: address,
-      constructorArguments: [
-        name,
-        symbol,
-        baseURI,
-        defaultTickets,
-        defaultExpiryDuration,
-      ],
+      constructorArguments: [name, symbol, decimals, deployer.address],
     });
     console.log("Contract verified successfully!");
   } catch (error) {

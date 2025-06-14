@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { ethers, isAddress } from "ethers";
-import MembershipCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/MembershipCards.json";
+import MembershipCardsAbi from "@/artifacts/src/contracts/erc721.membershipcard.sol/MembershipCards.json";
 import { getCollectiveConfig } from "@/lib/config";
 
 const getMembershipCardData = async (
@@ -20,17 +20,20 @@ const getMembershipCardData = async (
   );
 
   try {
-    const [ticketsLeft, expiry] = await contract.getCardData(tokenId);
-    console.log(">>> getMembershipCardData", ticketsLeft, expiry);
-    const expiryDate = Number(expiry);
+    const [mintedAt, expiryDate, owner] = await contract.getCardDataByTokenId(
+      tokenId
+    );
+    const name = await contract.name();
     return {
-      ticketsLeft: Number(ticketsLeft),
-      ticketsTotal: 10,
-      expiry: expiryDate,
+      name,
+      mintedAt: Number(mintedAt),
+      expiryDate: Number(expiryDate),
+      owner,
     };
   } catch (error) {
     console.error(">>> getMembershipCardData", tokenId, error);
-    return { error: (error as { reason: string }).reason };
+    const e = error as { reason: string; shortMessage: string };
+    return { error: e.reason || e.shortMessage };
   }
 };
 
@@ -43,29 +46,29 @@ export async function GET(
   const collectiveConfig = await getCollectiveConfig(collectiveSlug);
 
   // Fetch daysLeft + expiry from your backend or via ethers.js contract call
-  const passData = await getMembershipCardData(
+  const membershipData = await getMembershipCardData(
     collectiveConfig?.membershipCardContractAddress || "",
     tokenId
   );
 
-  if (passData.error) {
-    return Response.json({ error: passData.error }, { status: 400 });
+  console.log(">>> membershipData", membershipData);
+  if (membershipData.error) {
+    return Response.json({ error: membershipData.error }, { status: 400 });
   }
 
   return Response.json({
     name: `Commons Hub 10-Day Pass #${tokenId}`,
     description: `10-day pass to the Commons Hub Brussels.`,
-    image: `${process.env.WEBSITE_URL}/${collectiveSlug}/ticket.svg?ticketsLeft=${passData.ticketsLeft}&ticketsTotal=${passData.ticketsTotal}&expiryDate=${passData.expiry}`,
+    image: `${process.env.NEXT_PUBLIC_WEBAPP_URL}/${collectiveSlug}/membershipcard.svg?name=${membershipData.name}&mintedAt=${membershipData.mintedAt}&expiryDate=${membershipData.expiryDate}`,
     attributes: [
-      { trait_type: "Tickets", value: passData.ticketsTotal },
       {
-        trait_type: "Remaining tickets",
-        value: passData.ticketsLeft,
-        max_value: passData.ticketsTotal,
+        trait_type: "Member since",
+        value: membershipData.mintedAt,
+        display_type: "date",
       },
       {
         trait_type: "Expiry Date",
-        value: passData.expiry,
+        value: membershipData.expiryDate,
         display_type: "date",
       },
     ],

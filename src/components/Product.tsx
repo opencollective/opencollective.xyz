@@ -10,12 +10,19 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface ProductProps {
   product: Product;
 }
 
 export default function Product({ product }: ProductProps) {
+  const { user } = usePrivy();
+  const smartWallet = user?.linkedAccounts.find(
+    (account) => account.type === "smart_wallet"
+  );
+  console.log(">>> smartWallet", smartWallet);
+
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -145,12 +152,11 @@ export default function Product({ product }: ProductProps) {
           {(selectedPrice || singlePrice) && (
             <Button
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={() =>
-                window.open(
-                  (selectedPrice || singlePrice)!.stripeLink,
-                  "_blank"
-                )
-              }
+              onClick={() => {
+                window.location.href = `${
+                  (selectedPrice || singlePrice)!.stripeLink
+                }?client_reference_id=${smartWallet?.address}`;
+              }}
             >
               Purchase Now
             </Button>

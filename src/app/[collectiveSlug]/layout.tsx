@@ -1,4 +1,5 @@
 import { NostrProvider } from "@/providers/NostrProvider";
+import { PrivyProvider } from "@/providers/PrivyProvider";
 import { getCollectiveConfig } from "@/lib/config";
 import ThemeProvider from "@/components/ThemeProvider";
 import type { Metadata } from "next";
@@ -62,7 +63,9 @@ export default async function RootLayout({
 
   return (
     <ThemeProvider theme={collectiveConfig?.theme}>
-      <NostrProvider>{children}</NostrProvider>
+      <PrivyProvider>
+        <NostrProvider>{children}</NostrProvider>
+      </PrivyProvider>
     </ThemeProvider>
   );
 }
