@@ -1,7 +1,7 @@
 // src/app/api/[collectiveSlug]/tickets/mint/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { ethers, isAddress } from "ethers";
-import TicketCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/TicketCards.json";
+import MembershipCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/MembershipCards.json";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   // Connect to the contract
   const contract = new ethers.Contract(
     contractAddress,
-    TicketCardsAbi.abi,
+    MembershipCardsAbi.abi,
     signer
   );
 

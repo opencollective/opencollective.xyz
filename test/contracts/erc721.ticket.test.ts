@@ -2,24 +2,24 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { Contract } from "ethers";
 import { expect } from "chai";
 
-describe("TicketCards", function () {
+describe("MembershipCards", function () {
   let ticketContract: Contract;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   const name = "Commons Pass";
   const symbol = "CPASS";
   const baseURI = "https://api.example.com/passes";
-  const defaultTickets = 3;
+  const defaultNumberOfTickets = 3;
   const defaultExpiryDuration = 365 * 24 * 60 * 60; // 1 year in seconds
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
-    const TicketCards = await ethers.getContractFactory("TicketCards");
-    ticketContract = await TicketCards.deploy(
+    const MembershipCards = await ethers.getContractFactory("MembershipCards");
+    ticketContract = await MembershipCards.deploy(
       name,
       symbol,
       baseURI,
-      defaultTickets,
+      defaultNumberOfTickets,
       defaultExpiryDuration
     );
     await ticketContract.waitForDeployment();
@@ -36,8 +36,8 @@ describe("TicketCards", function () {
     });
 
     it("Should set the correct default values", async function () {
-      expect(await ticketContract.defaultTickets()).to.equal(
-        BigInt(defaultTickets)
+      expect(await ticketContract.defaultNumberOfTickets()).to.equal(
+        BigInt(defaultNumberOfTickets)
       );
       expect(await ticketContract.defaultExpiryDuration()).to.equal(
         BigInt(defaultExpiryDuration)
@@ -54,8 +54,8 @@ describe("TicketCards", function () {
 
     it("Should set the correct pass data for minted token", async function () {
       await ticketContract.mint(user.address);
-      const [ticketsLeft, expiry] = await ticketContract.getTicketCardData(1);
-      expect(Number(ticketsLeft)).to.equal(defaultTickets);
+      const [ticketsLeft, expiry] = await ticketContract.getCardData(1);
+      expect(Number(ticketsLeft)).to.equal(defaultNumberOfTickets);
       expect(Number(expiry)).to.be.gt(Math.floor(Date.now() / 1000));
     });
 
@@ -81,12 +81,12 @@ describe("TicketCards", function () {
 
     it("Should decrease tickets left when using a ticket", async function () {
       await ticketContract.useTicket(1);
-      const [ticketsLeft] = await ticketContract.getTicketCardData(1);
-      expect(ticketsLeft).to.equal(defaultTickets - 1);
+      const [ticketsLeft] = await ticketContract.getCardData(1);
+      expect(ticketsLeft).to.equal(defaultNumberOfTickets - 1);
     });
 
     it("Should not allow using tickets when none are left", async function () {
-      for (let i = 0; i < defaultTickets; i++) {
+      for (let i = 0; i < defaultNumberOfTickets; i++) {
         await ticketContract.useTicket(1);
       }
       await expect(ticketContract.useTicket(1)).to.be.revertedWith(
@@ -116,13 +116,13 @@ describe("TicketCards", function () {
     });
 
     it("Should return correct pass data", async function () {
-      const [ticketsLeft, expiry] = await ticketContract.getTicketCardData(1);
-      expect(ticketsLeft).to.equal(defaultTickets);
+      const [ticketsLeft, expiry] = await ticketContract.getCardData(1);
+      expect(ticketsLeft).to.equal(defaultNumberOfTickets);
       expect(expiry).to.be.gt(Math.floor(Date.now() / 1000));
     });
 
     it("Should revert when getting data for non-existent token", async function () {
-      await expect(ticketContract.getTicketCardData(999)).to.be.revertedWith(
+      await expect(ticketContract.getCardData(999)).to.be.revertedWith(
         "Token does not exist"
       );
     });

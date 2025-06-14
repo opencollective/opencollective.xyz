@@ -4,28 +4,28 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TicketCards is ERC721, Ownable {
+contract MembershipCards is ERC721, Ownable {
     uint256 public nextTokenId = 1;
-    uint8 public defaultTickets;
+    uint8 public defaultNumberOfTickets;
     uint256 public defaultExpiryDuration; // in seconds
     string public baseURI;
 
-    struct PassData {
+    struct CardData {
         uint8 ticketsLeft;
         uint256 expiry;
     }
 
-    mapping(uint256 => PassData) public ticketCards;
+    mapping(uint256 => CardData) public data;
 
     constructor(
         string memory _name,
         string memory _symbol,
         string memory _baseURI,
-        uint8 _defaultTickets,
+        uint8 _defaultNumberOfTickets,
         uint256 _defaultExpiryDuration
     ) ERC721(_name, _symbol) Ownable(msg.sender) {
         baseURI = _baseURI;
-        defaultTickets = _defaultTickets > 0 ? _defaultTickets : 1;
+        defaultNumberOfTickets = _defaultNumberOfTickets > 0 ? _defaultNumberOfTickets : 1;
         defaultExpiryDuration = _defaultExpiryDuration > 0 ? _defaultExpiryDuration : 365 days;
     }
 
@@ -33,23 +33,23 @@ contract TicketCards is ERC721, Ownable {
         uint256 tokenId = nextTokenId++;
         _safeMint(to, tokenId);
 
-        ticketCards[tokenId] = PassData({
-            ticketsLeft: defaultTickets,
+        data[tokenId] = CardData({
+            ticketsLeft: defaultNumberOfTickets,
             expiry: block.timestamp + defaultExpiryDuration
         });
     }
 
     function useTicket(uint256 tokenId) external onlyOwner {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
-        require(ticketCards[tokenId].ticketsLeft > 0, "No tickets left");
-        require(ticketCards[tokenId].expiry > block.timestamp, "Pass expired");
+        require(data[tokenId].ticketsLeft > 0, "No tickets left");
+        require(data[tokenId].expiry > block.timestamp, "Card expired");
 
-        ticketCards[tokenId].ticketsLeft -= 1;
+        data[tokenId].ticketsLeft -= 1;
     }
 
-    function getTicketCardData(uint256 tokenId) external view returns (uint8 ticketsLeft, uint256 expiry) {
+    function getCardData(uint256 tokenId) external view returns (uint8 ticketsLeft, uint256 expiry) {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
-        PassData memory ticketCard = ticketCards[tokenId];
+        CardData memory ticketCard = data[tokenId];
         return (ticketCard.ticketsLeft, ticketCard.expiry);
     }
 

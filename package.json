@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "deploy:ticket": "npx hardhat run scripts/deploy-contract.js --network baseSepolia",
+    "deploy:membershipcard": "npx hardhat run scripts/deploy-contract.js --network baseSepolia",
     "typechain": "hardhat typechain",
     "build": "hardhat compile && hardhat typechain && next build",
     "start": "next start",

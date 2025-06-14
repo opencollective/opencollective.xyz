@@ -18,7 +18,7 @@ async function main() {
   console.log("Deployer's public key:", deployer.address);
 
   // Get the contract factory
-  const TicketCards = await ethers.getContractFactory("TicketCards");
+  const MembershipCards = await ethers.getContractFactory("MembershipCards");
 
   // Interactive input for deployment parameters
   const collectiveSlug = await question("Enter collective slug: ");
@@ -30,7 +30,7 @@ async function main() {
   const defaultExpiryDuration = 365 * 24 * 60 * 60; // 1 year in seconds
   const baseURI = `${process.env.WEBSITE_URL}/${collectiveSlug}/tickets/metadata`;
 
-  console.log("\nDeploying TicketCards contract...");
+  console.log("\nDeploying MembershipCards contract...");
   console.log("Parameters:");
   console.log("- Name:", name);
   console.log("- Symbol:", symbol);
@@ -58,7 +58,7 @@ async function main() {
   }
 
   // Deploy the contract
-  const ticketCardsContract = await TicketCards.deploy(
+  const ticketCardsContract = await MembershipCards.deploy(
     name,
     symbol,
     baseURI,
@@ -71,7 +71,10 @@ async function main() {
 
   // Get the deployed contract address
   const address = await ticketCardsContract.getAddress();
-  console.log("TicketCards deployed to:", `${etherscanUrl}/address/${address}`);
+  console.log(
+    "MembershipCards deployed to:",
+    `${etherscanUrl}/address/${address}`
+  );
 
   // Get the deployment transaction
   const deployTx = ticketCardsContract.deploymentTransaction();

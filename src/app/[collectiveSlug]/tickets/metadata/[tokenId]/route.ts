@@ -1,39 +1,37 @@
 import { NextRequest } from "next/server";
 import { ethers, isAddress } from "ethers";
-import TicketCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/TicketCards.json";
+import MembershipCardsAbi from "@/artifacts/src/contracts/erc721.ticket.sol/MembershipCards.json";
 import { getCollectiveConfig } from "@/lib/config";
 
-const getTicketCardData = async (contractAddress: string, tokenId: string) => {
+const getMembershipCardData = async (
+  contractAddress: string,
+  tokenId: string
+) => {
   if (!isAddress(contractAddress)) {
-    throw new Error("getTicketCardData: Invalid contract address");
+    throw new Error("getMembershipCardData: Invalid contract address");
   }
 
   const provider = new ethers.JsonRpcProvider(process.env.BASE_SEPOLIA_RPC_URL);
 
   const contract = new ethers.Contract(
     contractAddress,
-    TicketCardsAbi.abi,
+    MembershipCardsAbi.abi,
     provider
   );
 
   try {
-    const [ticketsLeft, expiry] = await contract.getTicketCardData(tokenId);
-    console.log(">>> getTicketCardData", ticketsLeft, expiry);
-    const expiryDate = new Date(Number(expiry) * 1000);
+    const [ticketsLeft, expiry] = await contract.getCardData(tokenId);
+    console.log(">>> getMembershipCardData", ticketsLeft, expiry);
+    const expiryDate = Number(expiry);
     return {
       ticketsLeft: Number(ticketsLeft),
       ticketsTotal: 10,
-      expiry: expiryDate.toISOString().split("T")[0],
+      expiry: expiryDate,
     };
   } catch (error) {
-    console.error(">>> getTicketCardData", tokenId, error);
+    console.error(">>> getMembershipCardData", tokenId, error);
+    return { error: (error as { reason: string }).reason };
   }
-
-  return {
-    ticketsLeft: 7,
-    ticketsTotal: 10,
-    expiry: "2026-06-13",
-  };
 };
 
 export async function GET(
@@ -45,19 +43,31 @@ export async function GET(
   const collectiveConfig = await getCollectiveConfig(collectiveSlug);
 
   // Fetch daysLeft + expiry from your backend or via ethers.js contract call
-  const passData = await getTicketCardData(
-    collectiveConfig?.ticketContractAddress || "",
+  const passData = await getMembershipCardData(
+    collectiveConfig?.membershipCardContractAddress || "",
     tokenId
   );
 
+  if (passData.error) {
+    return Response.json({ error: passData.error }, { status: 400 });
+  }
+
   return Response.json({
     name: `Commons Hub 10-Day Pass #${tokenId}`,
-    description: `Pass with 10 entries.`,
+    description: `10-day pass to the Commons Hub Brussels.`,
     image: `${process.env.WEBSITE_URL}/${collectiveSlug}/ticket.svg?ticketsLeft=${passData.ticketsLeft}&ticketsTotal=${passData.ticketsTotal}&expiryDate=${passData.expiry}`,
     attributes: [
       { trait_type: "Tickets", value: passData.ticketsTotal },
-      { trait_type: "Tickets left", value: passData.ticketsLeft },
-      { trait_type: "Expiry Date", value: passData.expiry },
+      {
+        trait_type: "Remaining tickets",
+        value: passData.ticketsLeft,
+        max_value: passData.ticketsTotal,
+      },
+      {
+        trait_type: "Expiry Date",
+        value: passData.expiry,
+        display_type: "date",
+      },
     ],
   });
 }

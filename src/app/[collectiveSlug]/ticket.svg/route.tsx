@@ -1,6 +1,56 @@
 import { getCollectiveConfig } from "@/lib/config";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
+
+async function getBase64FromImageUrl(
+  imgSrc: string | null | undefined,
+  maxWidth?: number,
+  maxHeight?: number
+): Promise<{ base64: string; mimeType: string } | null> {
+  if (!imgSrc) {
+    return null;
+  }
+  try {
+    const response = await fetch(imgSrc);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer as ArrayBuffer);
+    console.log(
+      ">>> getBase64FromImageUrl: loading image",
+      imgSrc,
+      "image size",
+      buffer.length
+    );
+    // Process image with Sharp if dimensions are provided
+    let processedBuffer: Buffer = buffer;
+    if (maxWidth || maxHeight) {
+      const metadata = await sharp(buffer).metadata();
+      const { width, height } = metadata;
+
+      if (width && height) {
+        // Calculate the scaling factor needed to cover the area
+        const widthRatio = maxWidth ? maxWidth / width : Infinity;
+        const heightRatio = maxHeight ? maxHeight / height : Infinity;
+        const scale = Math.max(widthRatio, heightRatio);
+
+        // Calculate new dimensions
+        const newWidth = Math.ceil(width * scale);
+        const newHeight = Math.ceil(height * scale);
+
+        processedBuffer = await sharp(buffer)
+          .resize(newWidth, newHeight, { fit: "cover" })
+          .toBuffer();
+      }
+    }
+
+    const base64 = processedBuffer.toString("base64");
+    const mimeType = response.headers.get("content-type") || "image/jpeg";
+    return { base64, mimeType };
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    return null;
+  }
+}
 
 export async function GET(
   request: Request,
@@ -27,20 +77,30 @@ export async function GET(
   const primaryColor = collectiveConfig?.theme?.primaryColor || "#000000";
   const secondaryColor = collectiveConfig?.theme?.secondaryColor || "#000000";
 
-  const image = collectiveConfig?.profile?.photo
-    ? `
-  <image
-        xlink:href="${collectiveConfig?.profile?.photo}"
+  let image = `<rect x="0" y="148" width="212" height="188" fill="${secondaryColor}" opacity="0.4" style="mix-blend-mode: multiply;" />`;
+  const photo =
+    collectiveConfig?.profile?.photo || collectiveConfig?.profile?.banner;
+  if (photo) {
+    const imageData = await getBase64FromImageUrl(photo, 424, 396);
+    if (imageData) {
+      image = `<image
+        xlink:href="data:${imageData.mimeType};base64,${imageData.base64}"
         x="0" y="148" width="212" height="188"
         preserveAspectRatio="xMidYMid slice"
         filter="url(#greyscale)"
       />
       <rect x="0" y="168" width="212" height="188" fill="${primaryColor}" opacity="0.4" style="mix-blend-mode: soft-light;" />
-  `
-    : `<rect x="0" y="148" width="212" height="188" fill="${secondaryColor}" opacity="0.4" style="mix-blend-mode: multiply;" />`;
+  `;
+    }
+  }
 
-  return new Response(
-    `
+  const base64Logo = await getBase64FromImageUrl(
+    collectiveConfig?.profile?.picture,
+    120,
+    120
+  );
+
+  const svgContent = `
     <svg width="424" height="672" viewBox="0 0 212 336" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; border-radius: 16px; overflow: hidden;">
 
   <defs>
@@ -71,15 +131,21 @@ export async function GET(
     <rect width="212" height="148" fill="${primaryColor}" />
 
     <g fill="#FFFFFF" text-anchor="middle">
-      <text x="106" y="40" font-size="16" font-weight="bold" letter-spacing="-0.5">${collectiveConfig?.profile?.name}</text>
+      <text x="106" y="40" font-size="16" font-weight="bold" letter-spacing="-0.5">${
+        collectiveConfig?.profile?.name
+      }</text>
     </g>
 
-    <image
-      xlink:href="${collectiveConfig?.profile?.picture}"
+    ${
+      base64Logo
+        ? `<image
+      xlink:href="data:${base64Logo.mimeType};base64,${base64Logo.base64}"
       x="76" y="60"
       width="60" height="60"
       clip-path="circle(50% at 50% 50%)"
-    />
+    />`
+        : ""
+    }
 
     
     <rect x="0" y="148" width="212" height="30" fill="white" fill-opacity="0.8"/>
@@ -100,13 +166,12 @@ export async function GET(
     <rect x="0" y="0" width="212" height="336" fill="url(#glossEffect)" />
   </g>
 </svg>
+  `;
 
-
-    `,
-    {
-      headers: {
-        "Content-Type": "image/svg+xml",
-      },
-    }
-  );
+  return new Response(svgContent, {
+    headers: {
+      "Content-Type": "image/svg+xml",
+      "Content-Length": Buffer.byteLength(svgContent).toString(),
+    },
+  });
 }

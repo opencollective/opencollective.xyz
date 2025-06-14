@@ -154,7 +154,7 @@ export type CollectiveConfig = {
   profile: ProfileData;
   theme?: Theme;
   ignoreTxs?: string[];
-  ticketContractAddress?: string;
+  membershipCardContractAddress?: string;
 };
 
 export type ProfileData = {
@@ -163,6 +163,7 @@ export type ProfileData = {
   name?: string;
   about?: string;
   picture?: string;
+  banner?: string;
   photo?: string;
   website?: string;
 };
