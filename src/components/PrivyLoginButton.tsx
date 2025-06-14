@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { formatNumber } from "@/lib/utils";
 import { PlusCircle } from "lucide-react";
-import { gnosis } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 
 // USDC contract address on Base
 const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
@@ -48,10 +48,8 @@ export function PrivyLoginButton() {
   const handleTopUp = () => {
     fundWallet(user?.wallet?.address || "", {
       amount: "1000000000000000000",
-      chain: gnosis,
-      asset: {
-        erc20: "0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430",
-      },
+      chain: baseSepolia,
+      asset: "USDC",
     });
   };
 
