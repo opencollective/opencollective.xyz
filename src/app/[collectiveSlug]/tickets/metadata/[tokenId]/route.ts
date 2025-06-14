@@ -16,9 +16,17 @@ const getTicketCardData = async (contractAddress: string, tokenId: string) => {
     provider
   );
 
-  const data = await contract.getTicketCardData(tokenId);
-
-  console.log(">>> getTicketCardData", data);
+  try {
+    const [ticketsLeft, expiry] = await contract.getTicketCardData(tokenId);
+    console.log(">>> getTicketCardData", ticketsLeft, expiry);
+    return {
+      ticketsLeft,
+      ticketsTotal: 10,
+      expiry,
+    };
+  } catch (error) {
+    console.error(">>> getTicketCardData", tokenId, error);
+  }
 
   return {
     ticketsLeft: 7,
