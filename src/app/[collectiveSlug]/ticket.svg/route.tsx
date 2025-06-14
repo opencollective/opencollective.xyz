@@ -48,12 +48,16 @@ export async function GET(
       <feColorMatrix type="saturate" values="0" />
     </filter>
 
-    <linearGradient id="glossEffect" gradientTransform="rotate(25)">
-      <stop offset="0%" stop-color="white" stop-opacity="0" />
-      <stop offset="40%" stop-color="white" stop-opacity="0" />
-      <stop offset="50%" stop-color="white" stop-opacity="0.2" />
-      <stop offset="60%" stop-color="white" stop-opacity="0" />
-      <stop offset="100%" stop-color="white" stop-opacity="0" />
+  <linearGradient id="glossEffect" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop stop-color="white" stop-opacity="0">
+        <animate attributeName="offset" dur="11.5s" repeatCount="indefinite" keyTimes="0; 0.13; 1" values="-0.3; 1; 1" />
+      </stop>
+      <stop stop-color="white" stop-opacity="0.2">
+        <animate attributeName="offset" dur="11.5s" repeatCount="indefinite" keyTimes="0; 0.13; 1" values="-0.2; 1.1; 1.1" />
+      </stop>
+      <stop stop-color="white" stop-opacity="0">
+        <animate attributeName="offset" dur="11.5s" repeatCount="indefinite" keyTimes="0; 0.13; 1" values="-0.1; 1.2; 1.2" />
+      </stop>
     </linearGradient>
 
   </defs>
