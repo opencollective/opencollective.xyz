@@ -27,7 +27,10 @@ module.exports = {
 
   // Test file patterns
   testMatch: ["**/__tests__/**/*.(ts|tsx|js)", "**/*.(test|spec).(ts|tsx|js)"],
-
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/test/contracts/", // Ignore Hardhat test files
+  ],
   // Coverage settings
   collectCoverageFrom: ["src/**/*.(ts|tsx)", "!src/**/*.d.ts"],
 
