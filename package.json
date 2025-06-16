@@ -44,7 +44,7 @@
     "react-dom": "^19.0.0",
     "seedrandom": "^3.0.5",
     "shadcn": "^2.4.0-canary.17",
-    "sharp": "^0.34.2",
+    "sharp": "^0.30.4",
     "sonner": "^2.0.2",
     "stripe": "^18.2.1",
     "swr": "^2.3.3",
