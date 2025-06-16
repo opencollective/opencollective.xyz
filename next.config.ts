@@ -45,6 +45,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "euc.li",
       },
+      {
+        protocol: "https",
+        hostname: "**.discord.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
+      },
     ],
   },
   async redirects() {
@@ -76,9 +84,6 @@ const nextConfig: NextConfig = {
       });
     });
     return redirections;
-  },
-  experimental: {
-    turbo: {},
   },
 };
 

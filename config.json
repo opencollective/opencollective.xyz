@@ -254,6 +254,124 @@
         "secondaryColor": "#1CB260"
       },
       "membershipCardContractAddress": "0x18733D604C2620e7523506B81689deC7040E002B",
+      "discord": {
+        "guildId": "1280532848604086365",
+        "roles": [
+          {
+            "id": "1280559675292778617",
+            "name": "members",
+            "descriptions": "Members are casual members that contribute €10/month and 1 tokens per year.",
+            "burnAmount": 1,
+            "frequency": "yearly"
+          },
+          {
+            "id": "1356972890540736725",
+            "name": "shifters",
+            "descriptions": "Shifters are full time members that contribute €100 and 10 tokens per month.",
+            "burnAmount": 10,
+            "frequency": "monthly",
+            "gracePeriod": 30
+          },
+          {
+            "id": "1356973314794328254",
+            "name": "coworkers",
+            "descriptions": "Coworkers are full time members that contribute €250 and 3 tokens per month.",
+            "burnAmount": 3,
+            "frequency": "monthly",
+            "gracePeriod": 30
+          },
+          {
+            "id": "1359965350846009526",
+            "name": "Note taker steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359965220944220190",
+            "name": "Toilet steward",
+            "mintAmount": 3,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359964607803949250",
+            "name": "Kitchen steward",
+            "mintAmount": 3,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359964755930120295",
+            "name": "Plant steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359964918605942885",
+            "name": "Carpet steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1384167690951725096",
+            "name": "Backside (1st floor) steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1369303976679571537",
+            "name": "Backside (2nd floor) steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359966155145482431",
+            "name": "Communication steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1366460956250476655",
+            "name": "Surfaces steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1366461641226453093",
+            "name": "Growth steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1359965976199823560",
+            "name": "Token steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1377753360140075279",
+            "name": "Laundry steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1384166466315882628",
+            "name": "Groceries steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1384167297068957806",
+            "name": "Shifters steward",
+            "mintAmount": 1,
+            "frequency": "weekly"
+          },
+          {
+            "id": "1384167425011875991",
+            "name": "Stairs steward",
+            "mintAmount": 2,
+            "frequency": "weekly"
+          }
+        ]
+      },
       "products": [
         {
           "name": "Membership",

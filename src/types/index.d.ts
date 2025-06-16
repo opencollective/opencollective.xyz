@@ -145,6 +145,16 @@ export type Product = {
   prices: Price[];
 };
 
+export type Role = {
+  id: string;
+  name: string;
+  description?: string;
+  burnAmount?: number;
+  mintAmount?: number;
+  frequency?: "monthly" | "weekly";
+  gracePeriod?: number;
+};
+
 export type CollectiveConfig = {
   slug: string;
   products: Product[];
@@ -155,6 +165,10 @@ export type CollectiveConfig = {
   theme?: Theme;
   ignoreTxs?: string[];
   membershipCardContractAddress?: string;
+  discord?: {
+    guildId: string;
+    roles: Role[];
+  };
 };
 
 export type ProfileData = {

@@ -90,7 +90,7 @@ export default function CollectivePageContent({
           Transactions by month
         </h2>
         <div className="flex flex-col gap-8 sm:gap-16">
-          {pastMonths.map((month, i) => (
+          {pastMonths.map((month) => (
             <MonthlySection
               key={month.label}
               filter={{
@@ -102,7 +102,7 @@ export default function CollectivePageContent({
                 selectedTokens: tokens,
               }}
               transactions={filterTransactions(month.start, month.end)}
-              live={i === 0}
+              live={false}
               collectiveConfig={collectiveConfig}
             />
           ))}

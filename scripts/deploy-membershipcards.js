@@ -28,7 +28,7 @@ async function main() {
     "When does the membership expire? (in months): "
   );
   const defaultExpiryDuration = parseInt(expiration) * 30 * 24 * 60 * 60; // in seconds
-  const baseURI = `${process.env.NEXT_PUBLIC_WEBAPP_URL}/${collectiveSlug}/tickets/metadata`;
+  const baseURI = `${process.env.NEXT_PUBLIC_WEBAPP_URL}/${collectiveSlug}/membershipcards/metadata`;
 
   console.log("\nDeploying MembershipCards contract...");
   console.log("Parameters:");

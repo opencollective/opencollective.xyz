@@ -35,7 +35,16 @@ export async function mint(
   // Connect to the contract
   const contract = new ethers.Contract(tokenAddress, TokenAbi.abi, signer);
 
-  const tx = await contract.mint(recipientAddress, amount);
-  await tx.wait();
-  return tx.hash;
+  // If REPLACEMENT_UNDERPRICED, try again after 2 seconds
+  try {
+    const tx = await contract.mint(recipientAddress, amount);
+    await tx.wait();
+    return tx.hash;
+  } catch (e) {
+    if ((e as { code: string }).code === "REPLACEMENT_UNDERPRICED") {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return mint(tokenAddress, recipientAddress, amount);
+    }
+    throw e;
+  }
 }

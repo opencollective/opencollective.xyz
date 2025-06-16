@@ -13,9 +13,10 @@ export async function POST(req: Request) {
   const session = await stripe.checkout.sessions.retrieve(stripeSessionId, {
     expand: ["payment_link"],
   });
+  const paymentLink = session.payment_link as Stripe.PaymentLink;
   console.log(">>> session", session);
 
-  const collectiveSlug = session.metadata?.collectiveSlug;
+  const collectiveSlug = paymentLink.metadata?.collectiveSlug;
   if (!collectiveSlug) {
     return new Response(
       "collectiveSlug missing in the metadata of the Stripe payment link",
@@ -31,8 +32,8 @@ export async function POST(req: Request) {
     );
   }
 
-  const nftAddressString = session.metadata?.nft;
-  const tokenAddressString = session.metadata?.token;
+  const nftAddressString = paymentLink.metadata?.nft;
+  const tokenAddressString = paymentLink.metadata?.token;
   if (!nftAddressString && !tokenAddressString) {
     return new Response(
       "No nft or token address provided in the metadata of the Stripe payment link",
