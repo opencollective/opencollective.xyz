@@ -3,18 +3,12 @@
 import { CollectiveConfig } from "@/types";
 import Image from "next/image";
 import { DiscordMember } from "@/lib/discord";
+import { formatDate } from "@/lib/utils";
 
 type RoleMembers = {
   roleId: string;
   members: DiscordMember[];
 };
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-  });
-}
 
 export default function CollectivePageStewards({
   collectiveConfig,

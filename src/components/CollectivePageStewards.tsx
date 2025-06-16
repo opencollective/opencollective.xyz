@@ -3,6 +3,7 @@
 import { CollectiveConfig } from "@/types";
 import Image from "next/image";
 import { DiscordMember } from "@/lib/discord";
+import { formatDate } from "@/lib/utils";
 
 type RoleMembers = {
   roleId: string;
@@ -70,7 +71,7 @@ export default function CollectivePageStewards({
 
                 {/* Current Steward */}
                 {members[0] && (
-                  <div className="flex items-center gap-3 ml-6">
+                  <div className="flex items-center gap-3 ml-6 flex-row-reverse sm:flex-row">
                     <Image
                       src={members[0].avatar}
                       alt={members[0].username}
@@ -79,11 +80,12 @@ export default function CollectivePageStewards({
                       className="rounded-full border-2 border-background"
                     />
                     <div>
-                      <p className="font-medium">
+                      <p className="font-medium text-right sm:text-left">
                         {members[0].name || members[0].username}
                       </p>
-                      <p className="text-sm text-muted-foreground">
-                        Current Steward
+                      <p className="text-sm text-muted-foreground text-right sm:text-left">
+                        <span className="hidden sm:inline">Member since</span>{" "}
+                        {formatDate(members[0].since)}
                       </p>
                     </div>
                   </div>

@@ -79,6 +79,12 @@ async function getGuildMembers(guildId: string): Promise<DiscordMember[]> {
       }))
     );
 
+    members.sort((a, b) => {
+      const nameA = a.name || a.username;
+      const nameB = b.name || b.username;
+      return nameA.localeCompare(nameB) || 0;
+    });
+
     after = response[response.length - 1].user.id;
   }
 
