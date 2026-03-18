@@ -14,7 +14,6 @@ Collectives also need a way to issue their own token to reward non-financial con
 - [Xavier Damman](https://linkedin.com/in/xavierdamman) (founder of Open Collective)
 - [Leen Schelfhout](https://linkedin.com/in/leen-schelfhout) (cofounder and director of allforclimate.earth, an open collective host for climate)
 - [Cuiki](https://linkedin.com/in/cuiki) (original designer of Open Collective)
-- [Kris Decoodt](https://linkedin.com/in/krisdecoodt) (DAO wizard for Giveth, Gitcoin)
 
 ## What about the current version of Open Collective
 
